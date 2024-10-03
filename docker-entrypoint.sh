@@ -51,26 +51,26 @@ if [ ! -f /etc/ocserv/certs/server-key.pem ] || [ ! -f /etc/ocserv/certs/server-
 	tls_www_server
 	EOSRV
 	certtool --generate-certificate --load-privkey server-key.pem --load-ca-certificate ca.pem --load-ca-privkey ca-key.pem --template server.tmpl --outfile server-cert.pem
+fi
 
-	# Create a test user
-	if [ -z "$NO_TEST_USER" ] && [ ! -f /etc/ocserv/ocpasswd ]; then
-		echo "Create test user 'test' with password 'test'"
-		echo 'test:*:$5$DktJBFKobxCFd7wN$sn.bVw8ytyAaNamO.CvgBvkzDiFR6DaHdUzcif52KK7' > /etc/ocserv/ocpasswd
-	fi
+# Create a test user
+if [ -z "$NO_TEST_USER" ] && [ ! -f /etc/ocserv/ocpasswd ]; then
+	echo "Create test user 'test' with password 'test'"
+	echo 'test:*:$5$DktJBFKobxCFd7wN$sn.bVw8ytyAaNamO.CvgBvkzDiFR6DaHdUzcif52KK7' > /etc/ocserv/ocpasswd
+fi
 
-	# Set network and DNS for VPN clients if not set
-	if [ -z "$IPV4_NETWORK" ]; then
-		IPV4_NETWORK="192.168.99.0"
-	fi
+# Set network and DNS for VPN clients if not set
 
-	if [ -z "$IPV4_NETWORK" ]; then
-		IPV4_NETMASK="255.255.255.0"
-	fi
-	
-	if [ -z "$IPV4_DNS" ]; then
-		IPV4_DNS="8.8.8.8"
-	fi
+if [ -z "$IPV4_NETWORK" ]; then
+	IPV4_NETWORK="192.168.99.0"
+fi
 
+if [ -z "$IPV4_NETWORK" ]; then
+	IPV4_NETMASK="255.255.255.0"
+fi
+
+if [ -z "$IPV4_DNS" ]; then
+	IPV4_DNS="8.8.8.8"
 fi
 
 # Open ipv4 ip forward
