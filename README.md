@@ -1,38 +1,8 @@
 # docker-ocserv
 
-docker-ocserv is an OpenConnect VPN Server boxed in a Docker image built by [Tommy Lau](mailto:tommy@gen-new.com) currently maintained by [Amin Vakil](mailto:info@aminvakil.com).
+docker-ocserv is an OpenConnect VPN Server boxed in a Docker image originally built by [Tommy Lau](mailto:tommy@gen-new.com) and [Amin Vakil](mailto:info@aminvakil.com).
 
-## Update on Sep 04, 2021
-
-**Docker images are now tagged!**
-
-You can stick to a specific `ocserv` version like `quay.io/aminvakil/ocserv:1.1.3`, so you can get bugfixes, security patches and alpine version bumps, and be sure that your ocserv version always remains the same.
-
-You can also bump each `ocserv` minor update manually using something like `1.1.3-2` and so on.
-
-Latest tags can always be found [here](https://github.com/aminvakil/docker-ocserv/tags) and [here](https://quay.io/aminvakil/ocserv).
-
-## Update on Mar 26, 2021
-
-Upgrade alpine to 3.13.6 to use openssl 1.1.1k-r0.
-
-**Important Note**:
-
-Updating to this version is highly recommended becuase of this upgrade as [CVE-2021-3449](https://www.openssl.org/news/secadv/20210325.txt).
-
-## Update on Dec 30, 2020
-
-Upgrade alpine to 3.12.3 and ocserv to 1.1.2.
-
-**Important Note**:
-
-`isolate-workers = true` should be disabled in ocserv.conf, otherwise clients keep disconnecting after a while.
-
-This has been set by default on the new docker images, but you should change your current containers with this command yourself:
-
-```bash
-docker exec YOUR_CONTAINER_NAME sed -i 's/^isolate-workers/#isolate-workers/' /etc/ocserv/ocserv.conf
-```
+This project is fork with some additions. 
 
 ## What is OpenConnect Server?
 
@@ -43,13 +13,13 @@ docker exec YOUR_CONTAINER_NAME sed -i 's/^isolate-workers/#isolate-workers/' /e
 Get the docker image by running the following commands:
 
 ```bash
-docker pull quay.io/aminvakil/ocserv
+docker pull eukhlg/ocserv
 ```
 
 Start an ocserv instance:
 
 ```bash
-docker run --name ocserv --sysctl net.ipv4.ip_forward=1 --cap-add NET_ADMIN --security-opt no-new-privileges -p 443:443 -p 443:443/udp -d quay.io/aminvakil/ocserv
+docker run --name ocserv --sysctl net.ipv4.ip_forward=1 --cap-add NET_ADMIN --security-opt no-new-privileges -p 443:443 -p 443:443/udp -d eukhlg/ocserv
 ```
 
 This will start an instance with the a test user named `test` and password is also `test`.
@@ -72,48 +42,57 @@ All the variables to this image is optional, which means you don't have to type 
 
 `NO_TEST_USER`, while this variable is set to not empty, the `test` user will not be created. You have to create your own user with password. The default value is to create `test` user with password `test`.
 
+`IPV4_NETWORK`, this is the pool of addresses that leases will be given from.
+
+`IPV4_NETMASK`, this is the network mask for pool of addresses.
+
+`IPV4_DNS`, this is the advertised DNS server for pool of addresses.
+
+
 The default values of the above environment variables:
 
-|   Variable   |     Default     |
-|:------------:|:---------------:|
-|  **CA_CN**   |      VPN CA     |
-|  **CA_ORG**  |     Big Corp    |
-| **CA_DAYS**  |       9999      |
-|  **SRV_CN**  | www.example.com |
-| **SRV_ORG**  |    My Company   |
-| **SRV_DAYS** |       9999      |
-|
+|   Variable       |      Default     |
+|:----------------:|:----------------:|
+|  **CA_CN**       |      VPN CA      |
+|  **CA_ORG**      |     Big Corp     |
+| **CA_DAYS**      |       9999       |
+|  **SRV_CN**      | www.example.com  |
+| **SRV_ORG**      |    My Company    |
+| **SRV_DAYS**     |       9999       |
+| **IPV4_NETWORK** |   192.168.99.0   |
+| **IPV4_NETMASK** |   255.255.255.0  |
+| **IPV4_DNS**     |      8.8.8.8     |
 
 ### Running examples
 
 Start an instance out of the box with username `test` and password `test`
 
 ```bash
-docker run --name ocserv --sysctl net.ipv4.ip_forward=1 --cap-add NET_ADMIN --security-opt no-new-privileges -p 443:443 -p 443:443/udp -d quay.io/aminvakil/ocserv
+docker run --name ocserv --sysctl net.ipv4.ip_forward=1 --cap-add NET_ADMIN --security-opt no-new-privileges -p 443:443 -p 443:443/udp -d eukhlg/ocserv
 ```
 
 Start an instance with server name `my.test.com`, `My Test` and `365` days
 
 ```bash
-docker run --name ocserv --sysctl net.ipv4.ip_forward=1 --cap-add NET_ADMIN --security-opt no-new-privileges -p 443:443 -p 443:443/udp -e SRV_CN=my.test.com -e SRV_ORG="My Test" -e SRV_DAYS=365 -d quay.io/aminvakil/ocserv
+docker run --name ocserv --sysctl net.ipv4.ip_forward=1 --cap-add NET_ADMIN --security-opt no-new-privileges -p 443:443 -p 443:443/udp -e SRV_CN=my.test.com -e SRV_ORG="My Test" -e SRV_DAYS=365 -d eukhlg/ocserv
 ```
 
 Start an instance with CA name `My CA`, `My Corp` and `3650` days
 
 ```bash
-docker run --name ocserv --sysctl net.ipv4.ip_forward=1 --cap-add NET_ADMIN --security-opt no-new-privileges -p 443:443 -p 443:443/udp -e CA_CN="My CA" -e CA_ORG="My Corp" -e CA_DAYS=3650 -d quay.io/aminvakil/ocserv
+docker run --name ocserv --sysctl net.ipv4.ip_forward=1 --cap-add NET_ADMIN --security-opt no-new-privileges -p 443:443 -p 443:443/udp -e CA_CN="My CA" -e CA_ORG="My Corp" -e CA_DAYS=3650 -d eukhlg/ocserv
 ```
 
 A totally customized instance with both CA and server certification
 
 ```bash
-docker run --name ocserv --sysctl net.ipv4.ip_forward=1 --cap-add NET_ADMIN --security-opt no-new-privileges -p 443:443 -p 443:443/udp -e CA_CN="My CA" -e CA_ORG="My Corp" -e CA_DAYS=3650 -e SRV_CN=my.test.com -e SRV_ORG="My Test" -e SRV_DAYS=365 -d quay.io/aminvakil/ocserv
+docker run --name ocserv --sysctl net.ipv4.ip_forward=1 --cap-add NET_ADMIN --security-opt no-new-privileges -p 443:443 -p 443:443/udp -e CA_CN="My CA" -e CA_ORG="My Corp" -e CA_DAYS=3650 -e SRV_CN=my.test.com -e SRV_ORG="My Test" -e SRV_DAYS=365 -d eukhlg/ocserv
 ```
 
 Start an instance as above but without test user
 
 ```bash
-docker run --name ocserv --sysctl net.ipv4.ip_forward=1 --cap-add NET_ADMIN --security-opt no-new-privileges -p 443:443 -p 443:443/udp -e CA_CN="My CA" -e CA_ORG="My Corp" -e CA_DAYS=3650 -e SRV_CN=my.test.com -e SRV_ORG="My Test" -e SRV_DAYS=365 -e NO_TEST_USER=1 -v /some/path/to/ocpasswd:/etc/ocserv/ocpasswd -d quay.io/aminvakil/ocserv
+docker run --name ocserv --sysctl net.ipv4.ip_forward=1 --cap-add NET_ADMIN --security-opt no-new-privileges -p 443:443 -p 443:443/udp -e CA_CN="My CA" -e CA_ORG="My Corp" -e CA_DAYS=3650 -e SRV_CN=my.test.com -e SRV_ORG="My Test" -e SRV_DAYS=365 -e NO_TEST_USER=1 -v /some/path/to/ocpasswd:/etc/ocserv/ocpasswd -d eukhlg/ocserv
 ```
 
 **WARNING:** The ocserv requires the ocpasswd file to start, if `NO_TEST_USER=1` is provided, there will be no ocpasswd created, which will stop the container immediately after start it. You must specific a ocpasswd file pointed to `/etc/ocserv/ocpasswd` by using the volume argument `-v` by docker as demonstrated above.
