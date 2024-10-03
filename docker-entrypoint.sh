@@ -62,15 +62,15 @@ fi
 # Set network and DNS for VPN clients if not set
 
 if [ -z "$IPV4_NETWORK" ]; then
-	IPV4_NETWORK="192.168.99.0"
+	export IPV4_NETWORK="192.168.99.0"
 fi
 
 if [ -z "$IPV4_NETWORK" ]; then
-	IPV4_NETMASK="255.255.255.0"
+	export IPV4_NETMASK="255.255.255.0"
 fi
 
 if [ -z "$IPV4_DNS" ]; then
-	IPV4_DNS="8.8.8.8"
+	export IPV4_DNS="8.8.8.8"
 fi
 
 # Open ipv4 ip forward
