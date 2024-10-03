@@ -1,5 +1,5 @@
 route=default
-route = ${OC_IPV4_NETWORK}/${OC_IPV4_NETMASK}
+route = ${IPV4_NETWORK}/${IPV4_NETMASK}
 no-route = 192.168.0.0/255.255.0.0
 no-route = 10.0.0.0/255.0.0.0
 no-route = 172.16.0.0/255.240.0.0

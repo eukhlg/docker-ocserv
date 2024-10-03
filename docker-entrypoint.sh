@@ -57,13 +57,27 @@ if [ ! -f /etc/ocserv/certs/server-key.pem ] || [ ! -f /etc/ocserv/certs/server-
 		echo "Create test user 'test' with password 'test'"
 		echo 'test:*:$5$DktJBFKobxCFd7wN$sn.bVw8ytyAaNamO.CvgBvkzDiFR6DaHdUzcif52KK7' > /etc/ocserv/ocpasswd
 	fi
+
+	# Set network and DNS for VPN clients if not set
+	if [ -z "$IPV4_NETWORK" ]; then
+		IPV4_NETWORK="192.168.99.0"
+	fi
+
+	if [ -z "$IPV4_NETWORK" ]; then
+		IPV4_NETMASK="255.255.255.0"
+	fi
+	
+	if [ -z "$IPV4_DNS" ]; then
+		IPV4_DNS="8.8.8.8"
+	fi
+
 fi
 
 # Open ipv4 ip forward
 sysctl -w net.ipv4.ip_forward=1
 
 # Enable NAT forwarding
-iptables -t nat -A POSTROUTING -j MASQUERADE -s "${OC_IPV4_NETWORK}"/"${OC_IPV4_NETMASK}"
+iptables -t nat -A POSTROUTING -j MASQUERADE -s "${IPV4_NETWORK}"/"${IPV4_NETMASK}"
 iptables -A FORWARD -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu
 
 # Enable TUN device

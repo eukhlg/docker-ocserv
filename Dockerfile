@@ -3,8 +3,8 @@ FROM alpine:3.20.3
 LABEL maintainer="Amin Vakil <info@aminvakil.com>, Dmitry Romashov <dmitry@romashov.tech>"
 
 ENV OC_VERSION=1.3.0
-ENV OC_IPV4_NETWORK="192.168.99.0"
-ENV OC_IPV4_NETMASK="255.255.255.0"
+#ENV OC_IPV4_NETWORK="192.168.99.0"
+#ENV OC_IPV4_NETMASK="255.255.255.0"
 
 RUN apk add --no-cache bash
 
@@ -58,9 +58,12 @@ RUN sed -e 's/\.\/sample\.passwd/\/etc\/ocserv\/ocpasswd/' \
 	    -e 's/\(max-same-clients = \)2/\110/' \
 	    -e 's/\.\.\/tests/\/etc\/ocserv/' \
 	    -e 's/#\(compression.*\)/\1/' \
-	    -e '/^ipv4-network = /{s/192.168.1.0/${OC_IPV4_NETWORK}/}' \
-	    -e '/^ipv4-netmask = /{s/255.255.255.0/${OC_IPV4_NETMASK}/}' \
-	    -e 's/192.168.1.2/8.8.8.8/' \
+	    #-e '/^ipv4-network = /{s/192.168.1.0/${OC_IPV4_NETWORK}/}' \
+	    #-e '/^ipv4-netmask = /{s/255.255.255.0/${OC_IPV4_NETMASK}/}' \
+	    #-e 's/192.168.1.2/8.8.8.8/' \
+		-e '/^ipv4-network = /{s/192.168.1.0/${IPV4_NETWORK}/}' \
+		-e '/^ipv4-netmask = /{s/255.255.255.0/${IPV4_NETMASK}/}' \
+		-e 's/192.168.1.2/${IPV4_DNS}/' \
 	    -e 's/^route/#route/' \
 	    -e 's/^no-route/#no-route/' \
 	    -e '/\[vhost:www.example.com\]/,$d' \
