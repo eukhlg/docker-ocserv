@@ -50,18 +50,19 @@ RUN buildDeps=( \
 COPY routes.txt /tmp/
 
 # hadolint ignore=SC2016
-RUN sed -e 's/\.\/sample\.passwd/\/etc\/ocserv\/ocpasswd/' \
-	    -e 's/\(max-same-clients = \)2/\110/' \
-	    -e 's/\.\.\/tests/\/etc\/ocserv/' \
-	    -e 's/#\(compression.*\)/\1/' \
-		-e '/^ipv4-network = /{s/192.168.1.0/${IPV4_NETWORK}/}' \
-		-e '/^ipv4-netmask = /{s/255.255.255.0/${IPV4_NETMASK}/}' \
-		-e '/^dns = /{s/192.168.1.2/${IPV4_DNS}/}' \
-	    -e 's/^route/#route/' \
-	    -e 's/^no-route/#no-route/' \
-	    -e '/\[vhost:www.example.com\]/,$d' \
-	    -e '/^cookie-timeout = /{s/300/3600/}' \
-	    -e 's/^isolate-workers/#isolate-workers/' /tmp/ocserv-default.conf > /tmp/ocserv.conf \
+RUN sed \
+	-e 's/\.\/sample\.passwd/\/etc\/ocserv\/ocpasswd/' \
+	-e 's/\(max-same-clients = \)2/\110/' \
+	-e 's/\.\.\/tests/\/etc\/ocserv/' \
+	-e 's/#\(compression.*\)/\1/' \
+	-e '/^ipv4-network = /{s/192.168.1.0/${IPV4_NETWORK}/}' \
+	-e '/^ipv4-netmask = /{s/255.255.255.0/${IPV4_NETMASK}/}' \
+	-e '/^dns = /{s/192.168.1.2/${IPV4_DNS}/}' \
+	-e 's/^route/#route/' \
+	-e 's/^no-route/#no-route/' \
+	-e '/\[vhost:www.example.com\]/,$d' \
+	-e '/^cookie-timeout = /{s/300/3600/}' \
+	-e 's/^isolate-workers/#isolate-workers/' /tmp/ocserv-default.conf > /tmp/ocserv.conf \
 	&& cat /tmp/routes.txt >> /tmp/ocserv.conf
 
 WORKDIR /etc/ocserv
