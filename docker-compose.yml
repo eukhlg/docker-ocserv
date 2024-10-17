@@ -6,7 +6,18 @@ services:
     hostname: www.example.com
     ports:
       - 443:443/udp
-      - 443:443
+      - 443:443    
+    environment:
+      - CA_CN=$CA_CN
+      - CA_ORG=$CA_CN
+      - CA_DAYS=$CA_DAYS
+      - SRV_CN=$SRV_CN
+      - SRV_ORG=$SRV_ORG
+      - SRV_DAYS=$SRV_DAYS
+      - NO_TEST_USER=$NO_TEST_USER
+      - IPV4_NETWORK=$IPV4_NETWORK
+      - IPV4_NETMASK=$IPV4_NETMASK
+      - IPV4_DNS=$IPV4_DNS
     volumes:
       - "/opt/ocserv:/etc/ocserv"
     sysctls:
