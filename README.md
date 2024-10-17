@@ -10,6 +10,11 @@ This project is fork with some additions.
 
 ## How to use this image
 
+Install docker:
+
+```bash
+curl -L https://get.docker.com | sh
+```
 Get the docker image by running the following commands:
 
 ```bash
