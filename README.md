@@ -31,42 +31,18 @@ This will start an instance with the a test user named `test` and password is al
 
 ### Environment Variables
 
-All the variables to this image is optional, which means you don't have to type in any environment variables, and you can have a OpenConnect Server out of the box! However, if you like to config the ocserv the way you like it, here's what you wanna know.
 
-`CA_CN`, this is the common name used to generate the CA(Certificate Authority).
-
-`CA_ORG`, this is the organization name used to generate the CA.
-
-`CA_DAYS`, this is the expiration days used to generate the CA.
-
-`SRV_CN`, this is the common name used to generate the server certification.
-
-`SRV_ORG`, this is the organization name used to generate the server certification.
-
-`SRV_DAYS`, this is the expiration days used to generate the server certification.
-
-`NO_TEST_USER`, while this variable is set to not empty, the `test` user will not be created. You have to create your own user with password. The default value is to create `test` user with password `test`.
-
-`IPV4_NETWORK`, this is the pool of addresses that leases will be given from.
-
-`IPV4_NETMASK`, this is the network mask for pool of addresses.
-
-`IPV4_DNS`, this is the advertised DNS server for pool of addresses.
-
-
-The default values of the above environment variables:
-
-|   Variable       |      Default     |
-|:----------------:|:----------------:|
-|  **CA_CN**       |      VPN CA      |
-|  **CA_ORG**      |     Big Corp     |
-| **CA_DAYS**      |       9999       |
-|  **SRV_CN**      | www.example.com  |
-| **SRV_ORG**      |    My Company    |
-| **SRV_DAYS**     |       9999       |
-| **IPV4_NETWORK** |   192.168.99.0   |
-| **IPV4_NETMASK** |   255.255.255.0  |
-| **IPV4_DNS**     |      8.8.8.8     |
+|   Variable       |      Default     |                          Description                          |
+|:----------------:|:----------------:|:-------------------------------------------------------------:|
+|  **CA_CN**       |      VPN CA      | Common name used to generate the CA (Certificate Authority)   |
+|  **CA_ORG**      |     Big Corp     | Organization name used to generate the CA                     |
+| **CA_DAYS**      |       9999       | Expiration days used to generate the CA                       |
+|  **SRV_CN**      | www.example.com  | Common name used to generate the server certification         |
+| **SRV_ORG**      |    My Company    | Organization name used to generate the server certification   |
+| **SRV_DAYS**     |       9999       | Expiration days used to generate the server certification     |
+| **IPV4_NETWORK** |   192.168.99.0   | Pool of tunnel IP addresses that leases will be given from    |
+| **IPV4_NETMASK** |   255.255.255.0  | Network mask for pool of tunnel IP addresses                  |
+| **IPV4_DNS**     |      8.8.8.8     | Advertised DNS server for pool of tunnel IP addresses         |
 
 ### Running examples
 
