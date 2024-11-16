@@ -82,6 +82,12 @@ docker run --name ocserv --sysctl net.ipv4.ip_forward=1 --cap-add NET_ADMIN --se
 
 All the users opertaions happened while the container is running. If you used a different container name other than `ocserv`, then you have to change the container name accordingly.
 
+#### List all users
+
+```bash
+docker exec -it ocserv cut -d: -f1 /etc/ocserv/ocpasswd
+```
+
 #### Add user
 
 If say, you want to create a user named `test`, type the following command
