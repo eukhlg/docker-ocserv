@@ -13,8 +13,7 @@ This project is fork with some additions.
 Install docker:
 
 ```bash
-curl -L https://get.docker.com | sh \
-  && sudo usermod -aG docker $USER
+curl -L https://get.docker.com | sh && sudo usermod -aG docker $USER
 ```
 Get the docker image by running the following commands:
 
