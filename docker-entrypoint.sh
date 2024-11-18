@@ -88,7 +88,7 @@ if [ "${AUTH}" = "cert" ]; then
 
 		if [ ! -f /etc/ocserv/certs/client/${CLIENT_CN}-key.pem ] || [ ! -f /etc/ocserv/certs/client/${$CLIENT_CN}.pem ]; then
 			# Generate user certificate
-			mkdir /etc/ocserv/certs/client
+			mkdir -p /etc/ocserv/certs/client
 			cd /etc/ocserv/certs/client
 			certtool --generate-privkey --outfile ${CLIENT_CN}-key.pem
 			cat > ${CLIENT_CN}.tmpl <<-EOCL
@@ -98,7 +98,7 @@ if [ "${AUTH}" = "cert" ]; then
 			encryption_key
 			tls_www_client
 			EOCL
-			certtool --generate-certificate --load-privkey ${CLIENT_CN}-key.pem --load-ca-certificate ca.pem --load-ca-privkey ca-key.pem --template ${CLIENT_CN}.tmpl --outfile ${CLIENT_CN}.pem
+			certtool --generate-certificate --load-privkey ${CLIENT_CN}-key.pem --load-ca-certificate ../ca.pem --load-ca-privkey ../ca-key.pem --template ${CLIENT_CN}.tmpl --outfile ${CLIENT_CN}.pem
 			certtool --to-p12 --load-certificate ${CLIENT_CN}.pem --load-privkey ${CLIENT_CN}-key.pem --outder --outfile ${CLIENT_CN}.p12 --p12-name ${CLIENT_CN} --password 'test'
 		fi
 
