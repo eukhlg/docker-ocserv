@@ -168,9 +168,9 @@ To create a certificate for user `test`, type the following command
 ```bash
 docker exec -it ocserv occert test
 ```
-By default user certificate is valid for 365 days and P12 certificate password is 'openconnect'
+By default user certificate is valid for `365` days and P12 certificate password is `openconnect`
 
-To create a certificate for user `test`, with certificate valid for 30 days and password 'testpass' type the following command
+To create a certificate for user `test`, with certificate valid for 30 days and password `testpass` type the following command
 
 ```bash
 docker exec -it ocserv occert test 30 testpass
