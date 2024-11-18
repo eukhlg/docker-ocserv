@@ -70,6 +70,8 @@ RUN sed \
 WORKDIR /etc/ocserv
 
 COPY --chmod=755 docker-entrypoint.sh /entrypoint.sh
+COPY --chmod=755 occert.sh /usr/local/bin/occert
+
 ENTRYPOINT ["/entrypoint.sh"]
 
 EXPOSE 443
