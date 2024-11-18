@@ -158,3 +158,7 @@ docker exec -ti ocserv ocpasswd -c /etc/ocserv/ocpasswd -d test
 #### Change password
 
 Change password is exactly the same command as add user, please refer to the command mentioned above.
+
+### User operations (certificate authentication)
+
+..TBC
