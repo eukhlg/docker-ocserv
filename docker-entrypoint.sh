@@ -91,7 +91,7 @@ if [ "${AUTH}" = "cert" ]; then
 			mkdir /etc/ocserv/certs/client
 			cd /etc/ocserv/certs/client
 			certtool --generate-privkey --outfile ${CLIENT_CN}-key.pem
-			cat > client.tmpl <<-EOCL
+			cat > ${CLIENT_CN}.tmpl <<-EOCL
 			cn = "$CLIENT_CN"
 			expiration_days = "$CLIENT_DAYS"
 			signing_key
