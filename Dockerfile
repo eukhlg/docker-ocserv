@@ -51,9 +51,11 @@ COPY routes.txt /tmp/
 
 # hadolint ignore=SC2016
 RUN sed \
+ 	-e 's/^auth.*/auth = ${AUTH}/' \
 	-e 's/\.\/sample\.passwd/\/etc\/ocserv\/ocpasswd/' \
 	-e 's/\(max-same-clients = \)2/\110/' \
 	-e 's/\.\.\/tests/\/etc\/ocserv/' \
+	-e 's/^cert-user-oid.*/cert-user-oid = ${CERT_USER_OID}/' \
 	-e 's/#\(compression.*\)/\1/' \
 	-e '/^ipv4-network = /{s/192.168.1.0/${IPV4_NETWORK}/}' \
 	-e '/^ipv4-netmask = /{s/255.255.255.0/${IPV4_NETMASK}/}' \
