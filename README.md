@@ -13,7 +13,7 @@ This project is fork with some additions.
 Install docker:
 
 ```bash
-curl -L https://get.docker.com | sh
+curl -L https://get.docker.com | sh && sudo usermod -aG docker $USER
 ```
 Get the docker image by running the following commands:
 
@@ -24,61 +24,108 @@ docker pull eukhlg/ocserv
 Start an ocserv instance:
 
 ```bash
-docker run --name ocserv --sysctl net.ipv4.ip_forward=1 --cap-add NET_ADMIN --security-opt no-new-privileges -p 443:443 -p 443:443/udp -d eukhlg/ocserv
+docker run \
+  --name ocserv \
+  --detach \
+  --sysctl net.ipv4.ip_forward=1 \
+  --cap-add NET_ADMIN \
+  --security-opt no-new-privileges \
+  --publish 443:443 \
+  --publish 443:443/udp \
+  eukhlg/ocserv
 ```
 
-This will start an instance with the a test user named `test` and password is also `test`.
+This will start an instance without any users created.
 
 ### Environment Variables
 
 
-|   Variable       |      Default     |                          Description                          |
-|:----------------:|:----------------:|:-------------------------------------------------------------:|
-|  **CA_CN**       |      VPN CA      | Common name used to generate the CA (Certificate Authority)   |
-|  **CA_ORG**      |     Big Corp     | Organization name used to generate the CA                     |
-| **CA_DAYS**      |       9999       | Expiration days used to generate the CA                       |
-|  **SRV_CN**      | www.example.com  | Common name used to generate the server certification         |
-| **SRV_ORG**      |    My Company    | Organization name used to generate the server certification   |
-| **SRV_DAYS**     |       9999       | Expiration days used to generate the server certification     |
-| **IPV4_NETWORK** |   192.168.99.0   | Pool of tunnel IP addresses that leases will be given from    |
-| **IPV4_NETMASK** |   255.255.255.0  | Network mask for pool of tunnel IP addresses                  |
-| **IPV4_DNS**     |      8.8.8.8     | Advertised DNS server for pool of tunnel IP addresses         |
+|   Variable       |      Default     |                          Description                               |
+|:----------------:|:----------------:|:------------------------------------------------------------------:|
+|  **CA_CN**       |      VPN CA      | Common name used to generate the CA (Certificate Authority)        |
+|  **CA_ORG**      |     Big Corp     | Organization name used to generate the CA                          |
+| **CA_DAYS**      |       9999       | Expiration days used to generate the CA                            |
+|  **SRV_CN**      | www.example.com  | Common name used to generate the server certification              |
+| **SRV_ORG**      |    My Company    | Organization name used to generate the server certification        |
+| **SRV_DAYS**     |       9999       | Expiration days used to generate the server certification          |
+| **AUTH**         |       plain      | Client authentication method can be 'plain' or 'cert'              |
+| **TEST_USER**    |       test       | Name of test user. If not set test user is not created             |
+| **CLIENT_DAYS**  |       9999       | Expiration days used to generate the client certification          |
+| **IPV4_NETWORK** |   192.168.99.0   | Pool of tunnel IP addresses that leases will be given from         |
+| **IPV4_NETMASK** |   255.255.255.0  | Network mask for pool of tunnel IP addresses                       |
+| **IPV4_DNS**     |      8.8.8.8     | Advertised DNS server for pool of tunnel IP addresses              |
 
 ### Running examples
 
 Start an instance out of the box with username `test` and password `test`
 
 ```bash
-docker run --name ocserv --sysctl net.ipv4.ip_forward=1 --cap-add NET_ADMIN --security-opt no-new-privileges -p 443:443 -p 443:443/udp -d eukhlg/ocserv
+docker run \
+  --name ocserv \
+  --detach \
+  --sysctl net.ipv4.ip_forward=1 \
+  --cap-add NET_ADMIN \
+  --security-opt no-new-privileges \
+  --publish 443:443 \
+  --publish 443:443/udp \
+  --env TEST_USER=test \
+  eukhlg/ocserv
 ```
 
 Start an instance with server name `my.test.com`, `My Test` and `365` days
 
 ```bash
-docker run --name ocserv --sysctl net.ipv4.ip_forward=1 --cap-add NET_ADMIN --security-opt no-new-privileges -p 443:443 -p 443:443/udp -e SRV_CN=my.test.com -e SRV_ORG="My Test" -e SRV_DAYS=365 -d eukhlg/ocserv
+docker run \
+  --name ocserv \
+  --detach \
+  --sysctl net.ipv4.ip_forward=1 \
+  --cap-add NET_ADMIN \
+  --security-opt no-new-privileges \
+  --publish 443:443 \
+  --publish 443:443/udp \
+  --env TEST_USER=test \
+  --env SRV_CN=my.test.com \
+  --env SRV_ORG="My Test" \
+  --env SRV_DAYS=365 \
+  eukhlg/ocserv
 ```
 
 Start an instance with CA name `My CA`, `My Corp` and `3650` days
 
 ```bash
-docker run --name ocserv --sysctl net.ipv4.ip_forward=1 --cap-add NET_ADMIN --security-opt no-new-privileges -p 443:443 -p 443:443/udp -e CA_CN="My CA" -e CA_ORG="My Corp" -e CA_DAYS=3650 -d eukhlg/ocserv
-```
-
-A totally customized instance with both CA and server certification
-
-```bash
-docker run --name ocserv --sysctl net.ipv4.ip_forward=1 --cap-add NET_ADMIN --security-opt no-new-privileges -p 443:443 -p 443:443/udp -e CA_CN="My CA" -e CA_ORG="My Corp" -e CA_DAYS=3650 -e SRV_CN=my.test.com -e SRV_ORG="My Test" -e SRV_DAYS=365 -d eukhlg/ocserv
+docker run \
+  --name ocserv \
+  --detach \
+  --sysctl net.ipv4.ip_forward=1 \
+  --cap-add NET_ADMIN \
+  --security-opt no-new-privileges \
+  --publish 443:443 \
+  --publish 443:443/udp \
+  --env TEST_USER=test \
+  --env CA_CN="My CA" \
+  --env CA_ORG="My Corp" \
+  --env CA_DAYS=3650 \
+  eukhlg/ocserv
 ```
 
 Start an instance as above but without test user
 
 ```bash
-docker run --name ocserv --sysctl net.ipv4.ip_forward=1 --cap-add NET_ADMIN --security-opt no-new-privileges -p 443:443 -p 443:443/udp -e CA_CN="My CA" -e CA_ORG="My Corp" -e CA_DAYS=3650 -e SRV_CN=my.test.com -e SRV_ORG="My Test" -e SRV_DAYS=365 -e NO_TEST_USER=1 -v /some/path/to/ocpasswd:/etc/ocserv/ocpasswd -d eukhlg/ocserv
+docker run \
+  --name ocserv \
+  --detach \
+  --sysctl net.ipv4.ip_forward=1 \
+  --cap-add NET_ADMIN \
+  --security-opt no-new-privileges \
+  --publish 443:443 \
+  --publish 443:443/udp \
+  --env CA_CN="My CA" \
+  --env CA_ORG="My Corp" \
+  --env CA_DAYS=3650 \
+  eukhlg/ocserv
 ```
 
-**WARNING:** The ocserv requires the ocpasswd file to start, if `NO_TEST_USER=1` is provided, there will be no ocpasswd created, which will stop the container immediately after start it. You must specific a ocpasswd file pointed to `/etc/ocserv/ocpasswd` by using the volume argument `-v` by docker as demonstrated above.
-
-### User operations
+### User operations (plain authentication)
 
 All the users opertaions happened while the container is running. If you used a different container name other than `ocserv`, then you have to change the container name accordingly.
 
@@ -108,8 +155,10 @@ Delete user is similar to add user, just add another argument `-d` to the comman
 docker exec -ti ocserv ocpasswd -c /etc/ocserv/ocpasswd -d test
 ```
 
-The above command will delete the default user `test`, if you start the instance without using environment variable `NO_TEST_USER`.
-
 #### Change password
 
 Change password is exactly the same command as add user, please refer to the command mentioned above.
+
+### User operations (certificate authentication)
+
+..TBC
