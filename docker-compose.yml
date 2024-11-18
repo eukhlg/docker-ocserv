@@ -4,14 +4,16 @@ services:
     restart: unless-stopped
     container_name: ocserv
     hostname: www.example.com
+    env_file:
+      - oc.env
     ports:
       - 443:443/udp
       - 443:443    
     volumes:
       - "/opt/ocserv:/etc/ocserv"
     sysctls:
-    - net.ipv4.ip_forward=1
+      - net.ipv4.ip_forward=1
     cap_add:
-    - NET_ADMIN
+      - NET_ADMIN
     security_opt:
-    - no-new-privileges
+      - no-new-privileges

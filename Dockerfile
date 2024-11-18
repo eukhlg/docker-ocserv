@@ -51,7 +51,7 @@ COPY routes.txt /tmp/
 
 # hadolint ignore=SC2016
 RUN sed \
- 	-e 's/^auth.*/auth = ${AUTH}/' \
+ 	-e 's/^auth = .*/auth = ${AUTH}/' \
 	-e 's/\.\/sample\.passwd/\/etc\/ocserv\/ocpasswd/' \
 	-e 's/\(max-same-clients = \)2/\110/' \
 	-e 's/\.\.\/tests/\/etc\/ocserv/' \
