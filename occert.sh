@@ -30,7 +30,8 @@ cd /etc/ocserv/certs/client
 EOCL
 
 certtool --generate-certificate --load-privkey ${CLIENT_CN}-key.pem --load-ca-certificate ../ca.pem --load-ca-privkey ../ca-key.pem --template ${CLIENT_CN}.tmpl --outfile ${CLIENT_CN}.pem
-certtool --to-p12 --load-certificate ${CLIENT_CN}.pem --load-privkey ${CLIENT_CN}-key.pem --outder --outfile ${CLIENT_CN}.p12 --p12-name ${CLIENT_CN} --password ${P12_PWD}
+#certtool --to-p12 --load-certificate ${CLIENT_CN}.pem --load-privkey ${CLIENT_CN}-key.pem --outder --outfile ${CLIENT_CN}.p12 --p12-name ${CLIENT_CN} --password ${P12_PWD}
+openssl pkcs12 -export -in ${CLIENT_CN}.pem -inkey ${CLIENT_CN}-key.pem -out ${CLIENT_CN}.p12 -legacy -passout pass:${P12_PWD}
 echo "Certificate for "\'${CLIENT_CN}\'" has been created sucessfully"
 echo "Certificate is valid for ${CLIENT_DAYS} days"
 echo "P12 Certiticate password is "\'${P12_PWD}\'""
