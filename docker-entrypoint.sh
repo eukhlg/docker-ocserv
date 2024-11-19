@@ -71,7 +71,7 @@ if [ "${AUTH}" = "plain" ] && [ ! -f /etc/ocserv/ocpasswd ]; then
 
 fi
 
-if [ "${AUTH}" = "cert" ]; then
+if [ "${AUTH}" = "cert" ] && [ ! -f /etc/ocserv/certs/client/${CLIENT_CN}-key.pem ] && [ ! -f /etc/ocserv/certs/client/${CLIENT_CN}.pem ]; then
 	
 	export AUTH="certificate"
 	export CERT_USER_OID="2.5.4.3"
@@ -81,15 +81,9 @@ if [ "${AUTH}" = "cert" ]; then
 		if [ -z "$CLIENT_CN" ]; then
 			CLIENT_CN=${TEST_USER}
 		fi
-		
-		if [ -z "$CLIENT_DAYS" ]; then
-			CLIENT_DAYS=365
-		fi
-
-		if [ ! -f /etc/ocserv/certs/client/${CLIENT_CN}-key.pem ] || [ ! -f /etc/ocserv/certs/client/${CLIENT_CN}.pem ]; then
-			# Generate user certificate
-			occert ${CLIENT_CN} ${CLIENT_DAYS} test
-		fi
+  
+		# Generate user certificate
+		occert ${CLIENT_CN} ${CLIENT_DAYS} test
 
 	fi
 
@@ -122,10 +116,8 @@ mknod /dev/net/tun c 10 200
 chmod 600 /dev/net/tun
 
 # Update config
-if [ ! -f /etc/ocserv/ocserv.conf ]; then
-	echo "Creating ocserv config '/etc/ocserv/ocserv.conf'"
-	envsubst < /tmp/ocserv.conf > /etc/ocserv/ocserv.conf
-fi
+echo "Creating ocserv config '/etc/ocserv/ocserv.conf'"
+envsubst < /tmp/ocserv.conf > /etc/ocserv/ocserv.conf
 
 # Run OpennConnect Server
 exec "$@"
