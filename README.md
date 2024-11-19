@@ -55,6 +55,19 @@ This will start an instance without any users created.
 | **IPV4_NETMASK** |   255.255.255.0  | Network mask for pool of tunnel IP addresses                       |
 | **IPV4_DNS**     |      8.8.8.8     | Advertised DNS server for pool of tunnel IP addresses              |
 
+### Updating image to the latest version
+
+```bash
+docker stop ocserv && docker rm ocserv && docker image prune --all -f && docker pull eukhlg/ocserv
+```
+Then you have to tun container with your options (see Running examples)
+
+#### If using docker compose
+
+```bash
+docker compose pull && docker compose up -d
+```
+
 ### Running examples
 
 Start an instance out of the box with username `test` and password `test`
