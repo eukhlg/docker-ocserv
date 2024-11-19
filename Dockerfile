@@ -42,7 +42,7 @@ RUN buildDeps=( \
 			| sort -u \
 		)" \
 	&& readarray runDepsArr <<< "$runDeps" \
-	&& apk add --virtual .run-deps "${runDepsArr[@]}" gnutls-utils iptables libnl3 readline libseccomp-dev lz4-dev gettext-envsubst \
+	&& apk add --virtual .run-deps "${runDepsArr[@]}" gnutls-utils openssl iptables libnl3 readline libseccomp-dev lz4-dev gettext-envsubst \
 	&& apk del .build-deps \
 	&& rm -rf /var/cache/apk/*
 
