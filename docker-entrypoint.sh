@@ -58,12 +58,12 @@ if [ ! -f /etc/ocserv/certs/server-key.pem ] || [ ! -f /etc/ocserv/certs/server-
 	certtool --generate-certificate --load-privkey server-key.pem --load-ca-certificate ca.pem --load-ca-privkey ca-key.pem --template server.tmpl --outfile server-cert.pem
 fi
 
-if [ "${AUTH}" = "plain" ] && [ ! -f /etc/ocserv/ocpasswd ]; then
+if [ "${AUTH}" = "plain" ]; then
 
 	export AUTH="plain[passwd=/etc/ocserv/ocpasswd]"
 	export CERT_USER_OID="0.9.2342.19200300.100.1.1"
 
-	if [ ! -z "$TEST_USER" ]; then
+	if [ ! -z "$TEST_USER" ]  && [ ! -f /etc/ocserv/ocpasswd ]; then
 	# Create a user
 	echo "Create user ${TEST_USER} with password 'test'"
 	echo "$TEST_USER:*:\$5\$DktJBFKobxCFd7wN\$sn.bVw8ytyAaNamO.CvgBvkzDiFR6DaHdUzcif52KK7" > /etc/ocserv/ocpasswd
@@ -71,7 +71,7 @@ if [ "${AUTH}" = "plain" ] && [ ! -f /etc/ocserv/ocpasswd ]; then
 
 fi
 
-if [ "${AUTH}" = "cert" ] && [ ! -f /etc/ocserv/certs/client/${CLIENT_CN}-key.pem ] && [ ! -f /etc/ocserv/certs/client/${CLIENT_CN}.pem ]; then
+if [ "${AUTH}" = "cert" ]; then
 	
 	export AUTH="certificate"
 	export CERT_USER_OID="2.5.4.3"
