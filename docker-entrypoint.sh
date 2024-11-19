@@ -86,7 +86,7 @@ if [ "${AUTH}" = "cert" ]; then
 			CLIENT_DAYS=365
 		fi
 
-		if [ ! -f /etc/ocserv/certs/client/${CLIENT_CN}-key.pem ] || [ ! -f /etc/ocserv/certs/client/${$CLIENT_CN}.pem ]; then
+		if [ ! -f /etc/ocserv/certs/client/${CLIENT_CN}-key.pem ] || [ ! -f /etc/ocserv/certs/client/${CLIENT_CN}.pem ]; then
 			# Generate user certificate
 			occert ${CLIENT_CN} ${CLIENT_DAYS} test
 		fi
