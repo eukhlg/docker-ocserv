@@ -15,7 +15,7 @@ Install docker:
 ```bash
 curl -L https://get.docker.com | sh && sudo usermod -aG docker $USER
 ```
-Get the docker image by running the following commands:
+Pull the docker image by running the following commands:
 
 ```bash
 docker pull eukhlg/ocserv
@@ -40,20 +40,24 @@ This will start an instance without any users created.
 ### Environment Variables
 
 
-|   Variable       |      Default     |                          Description                               |
-|:----------------:|:----------------:|:------------------------------------------------------------------:|
-|  **CA_CN**       |      VPN CA      | Common name used to generate the CA (Certificate Authority)        |
-|  **CA_ORG**      |     Big Corp     | Organization name used to generate the CA                          |
-| **CA_DAYS**      |       9999       | Expiration days used to generate the CA                            |
-|  **SRV_CN**      | www.example.com  | Common name used to generate the server certification              |
-| **SRV_ORG**      |    My Company    | Organization name used to generate the server certification        |
-| **SRV_DAYS**     |       9999       | Expiration days used to generate the server certification          |
-| **AUTH**         |       plain      | Client authentication method can be 'plain' or 'cert'              |
-| **TEST_USER**    |       test       | Name of test user. If not set test user is not created             |
-| **CLIENT_DAYS**  |       9999       | Expiration days used to generate the client certification          |
-| **IPV4_NETWORK** |   192.168.99.0   | Pool of tunnel IP addresses that leases will be given from         |
-| **IPV4_NETMASK** |   255.255.255.0  | Network mask for pool of tunnel IP addresses                       |
-| **IPV4_DNS**     |      8.8.8.8     | Advertised DNS server for pool of tunnel IP addresses              |
+|   Variable            |      Default     |                          Description                               |
+|:---------------------:|:----------------:|:------------------------------------------------------------------:|
+| **AUTH**              |       plain      | Client authentication method can be 'plain' or 'cert'              |
+|  **CA_CN**            |BigCorp Server CA | Common name used to generate the CA (Certificate Authority)        |
+|  **CA_ORG**           |     BigCorp      | Organization name used to generate the CA                          |
+| **CA_DAYS**           |       1825       | Expiration days used to generate the CA                            |
+|  **SRV_CN**           | www.example.com  | Common name used to generate the server certification              |
+| **SRV_ORG**           |    MyCompany     | Organization name used to generate the server certification        |
+| **SRV_DAYS**          |       1825       | Expiration days used to generate the server certification          |
+| **USER_NAME**         |       test       | Name of default user. If not set user is not created               |
+| **CLIENT_DAYS**       |       365        | Expiration days used to generate the client certification          |
+| **IPV4_NETWORK**      |   192.168.99.0   | Pool of tunnel IP addresses that leases will be given from         |
+| **TCP_PORT**          |   443            | TCP port number                                                    |
+| **UDP_PORT**          |   443            | UDPP port number                                                   |
+| **ISOLATE_WORKERS**   |   true           | Whether to enable seccomp/Linux namespaces worker isolation        |
+| **IPV4_NETWORK**      |   192.168.99.0   | Pool of tunnel IP addresses that leases will be given from         |
+| **IPV4_NETMASK**      |   255.255.255.0  | Network mask for pool of tunnel IP addresses                       |
+| **IPV4_DNS**          |      8.8.8.8     | Advertised DNS server for pool of tunnel IP addresses              |
 
 ### Updating image to the latest version
 
@@ -81,7 +85,7 @@ docker run \
   --security-opt no-new-privileges \
   --publish 443:443 \
   --publish 443:443/udp \
-  --env TEST_USER=test \
+  --env USER_NAME=test \
   eukhlg/ocserv
 ```
 
@@ -96,7 +100,7 @@ docker run \
   --security-opt no-new-privileges \
   --publish 443:443 \
   --publish 443:443/udp \
-  --env TEST_USER=test \
+  --env USER_NAME=test \
   --env SRV_CN=my.test.com \
   --env SRV_ORG="My Test" \
   --env SRV_DAYS=365 \
@@ -114,14 +118,14 @@ docker run \
   --security-opt no-new-privileges \
   --publish 443:443 \
   --publish 443:443/udp \
-  --env TEST_USER=test \
+  --env USER_NAME=test \
   --env CA_CN="My CA" \
   --env CA_ORG="My Corp" \
   --env CA_DAYS=3650 \
   eukhlg/ocserv
 ```
 
-Start an instance as above but without test user
+Start an instance as above but without default user
 
 ```bash
 docker run \

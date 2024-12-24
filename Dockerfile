@@ -51,21 +51,52 @@ COPY routes.txt /tmp/
 
 # hadolint ignore=SC2016
 RUN sed \
- 	-e 's/^auth = .*/auth = ${AUTH}/' \
+	-e 's/\(^auth = \).*/\1${AUTH}/' \
 	-e 's/\.\/sample\.passwd/\/etc\/ocserv\/ocpasswd/' \
-	-e 's/\(max-same-clients = \)2/\110/' \
+	-e 's/\(^tcp-port = \)[0-9]\+/\1${TCP_PORT}/' \
+	-e 's/\(^udp-port = \)[0-9]\+/\1${UDP_PORT}/' \
 	-e 's/\.\.\/tests/\/etc\/ocserv/' \
-	-e 's/^cert-user-oid.*/cert-user-oid = ${CERT_USER_OID}/' \
+	-e 's/\(^isolate-workers = \)true/\1${ISOLATE_WORKERS}/' \
+	-e 's/\(^max-clients = \)[0-9]\+/\1${MAX_CLIENTS}/' \
+	-e 's/\(^max-same-clients = \)[0-9]\+/\1${MAX_SAME_CLIENTS}/' \
+	-e 's/\(^rate-limit-ms = \)[0-9]\+/\1${RATE_LIMIT}/' \
+	-e 's/\(^server-stats-reset-time = \)[0-9]\+/\1${SERVER_STATS_RESET}/' \
+	-e 's/\(^keepalive = \)[0-9]\+/\1${KEEPALIVE}/' \
+	-e 's/\(^dpd = \)[0-9]\+/\1${DPD}/' \
+	-e 's/\(^mobile-dpd = \)[0-9]\+/\1${MOBILE_DPD}/' \
+	-e 's/\(^switch-to-tcp-timeout = \)[0-9]\+/\1${SWITCH_TO_TCP}/' \
+	-e 's/\(^try-mtu-discovery = \)false/\1${MTU_DISCOVERY}/' \
+	-e 's/\(^cert-user-oid = \).*/\1${CERT_USER_OID}/' \
 	-e 's/#\(compression.*\)/\1/' \
-	-e '/^ipv4-network = /{s/192.168.1.0/${IPV4_NETWORK}/}' \
-	-e '/^ipv4-netmask = /{s/255.255.255.0/${IPV4_NETMASK}/}' \
-	-e '/^dns = /{s/192.168.1.2/${IPV4_DNS}/}' \
-	-e 's/^route/#route/' \
-	-e 's/^no-route/#no-route/' \
-	-e '/\[vhost:www.example.com\]/,$d' \
-	-e '/^cookie-timeout = /{s/300/3600/}' \
-	-e 's/^isolate-workers/#isolate-workers/' /tmp/ocserv-default.conf > /tmp/ocserv.conf \
-	&& cat /tmp/routes.txt >> /tmp/ocserv.conf
+	-e 's/\(^compression = \)false/\1${COMPRESSION}/' \
+	-e 's/\(^tls-priorities = \).*/\1${TLS_PRIORITIES}/' \
+	-e 's/\(^auth-timeout = \)[0-9]\+/\1${AUTH_TIMEOUT}/' \
+	-e 's/\(^min-reauth-time = \)[0-9]\+/\1${MIN_REAUTH_TIME}/' \
+	-e 's/\(^max-ban-score = \)[0-9]\+/\1${MAX_BAN_SCORE}/' \
+	-e 's/\(^ban-reset-time = \)[0-9]\+/\1${BAN_RESET_TIME}/' \
+	-e 's/\(^cookie-timeout = \)[0-9]\+/\1${COOKIE_TIMEOUT}/' \
+	-e 's/\(^deny-roaming = \)false/\1${DENY_ROAMING}/' \
+	-e 's/\(^rekey-time = \)[0-9]\+/\1${REKEY_TIME}/' \
+	-e 's/\(^use-occtl = \)true/\1${USE_OCCTL}/' \
+	-e 's/\(^log-level = \)[0-9]\+/\1${LOG_LEVEL}/' \
+	-e 's/\(^device = \)vpns/\1${DEV_NAME}/' \
+	-e 's/\(^predictable-ips = \)true/\1${PREDICTABLE_IPS}/' \
+	-e 's/\(^default-domain = \).*/\1${DEFAULT_DOMAIN}/' \
+	-e 's/\(^ipv4-network = \)[0-9]\{1,3\}\([.][0-9]\{1,3\}\)\{3\}/\1${IPV4_NETWORK}/' \
+	-e 's/\(^ipv4-netmask = \)[0-9]\{1,3\}\([.][0-9]\{1,3\}\)\{3\}/\1${IPV4_NETMASK}/' \
+	-e 's/\(^dns = \)[0-9]\{1,3\}\([.][0-9]\{1,3\}\)\{3\}/\1${IPV4_DNS}/' \
+	-e 's/\(^ping-leases = \)false/\1${PING_LEASES}/' \
+	-e 's/\(^cisco-client-compat = \)true/\1${CISCO_CLIENT_COMPAT}/' \
+	-e 's/\(^dtls-legacy = \)true/\1${DTLS_LEGACY}/' \
+	-e 's/\(^cisco-svc-client-compat = \)false/\1${CISCO_SVC_CLIENT_COMPAT}/' \
+	-e 's/\(^client-bypass-protocol = \)false/\1${CLIENT_BYPASS_PROTO}/' \
+	-e 's/\(^camouflage = \)false/\1${CAMOUFLAGE}/' \
+	-e 's/\(^camouflage_secret = \).*/\1${CAMOUFLAGE_SECRET}/' \
+	-e 's/\(^camouflage_realm = \).*/\1${CAMOUFLAGE_REALM}/' \
+	-e 's/\(.*route.*\)/#\1/' \
+	-e '/\[vhost:www.example.com\]/,/cert-user-oid.*/d' \
+	-e '/^[[:space:]]*#/d; /^[[:space:]]*$/d' /tmp/ocserv-default.conf > /tmp/ocserv.conf
+
 
 WORKDIR /etc/ocserv
 
