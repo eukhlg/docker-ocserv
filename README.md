@@ -40,24 +40,54 @@ This will start an instance without any users created.
 ### Environment Variables
 
 
-|   Variable            |      Default     |                          Description                               |
-|:---------------------:|:----------------:|:------------------------------------------------------------------:|
-| **AUTH**              |       plain      | Client authentication method can be 'plain' or 'cert'              |
-|  **CA_CN**            |BigCorp Server CA | Common name used to generate the CA (Certificate Authority)        |
-|  **CA_ORG**           |     BigCorp      | Organization name used to generate the CA                          |
-| **CA_DAYS**           |       1825       | Expiration days used to generate the CA                            |
-|  **SRV_CN**           | www.example.com  | Common name used to generate the server certification              |
-| **SRV_ORG**           |    MyCompany     | Organization name used to generate the server certification        |
-| **SRV_DAYS**          |       1825       | Expiration days used to generate the server certification          |
-| **USER_NAME**         |       test       | Name of default user. If not set user is not created               |
-| **CLIENT_DAYS**       |       365        | Expiration days used to generate the client certification          |
-| **IPV4_NETWORK**      |   192.168.99.0   | Pool of tunnel IP addresses that leases will be given from         |
-| **TCP_PORT**          |   443            | TCP port number                                                    |
-| **UDP_PORT**          |   443            | UDPP port number                                                   |
-| **ISOLATE_WORKERS**   |   true           | Whether to enable seccomp/Linux namespaces worker isolation        |
-| **IPV4_NETWORK**      |   192.168.99.0   | Pool of tunnel IP addresses that leases will be given from         |
-| **IPV4_NETMASK**      |   255.255.255.0  | Network mask for pool of tunnel IP addresses                       |
-| **IPV4_DNS**          |      8.8.8.8     | Advertised DNS server for pool of tunnel IP addresses              |
+|   Variable            |      Default     |                          Description                                      |
+|:---------------------:|:----------------:|:-------------------------------------------------------------------------:|
+| **AUTH**              |       plain      | Client authentication method can be 'plain' or 'cert'                     |
+| **CA_CN**             |BigCorp Server CA | Common name used to generate the CA (Certificate Authority)               |
+| **CA_ORG**            |     BigCorp      | Organization name used to generate the CA                                 |
+| **CA_DAYS**           |       1825       | Expiration days used to generate the CA                                   |
+| **SRV_CN**            | www.example.com  | Common name used to generate the server certification                     |
+| **SRV_ORG**           |    MyCompany     | Organization name used to generate the server certification               |
+| **SRV_DAYS**          |       1825       | Expiration days used to generate the server certification                 |
+| **USER_NAME**         |       test       | Name of default user. If not set user is not created                      |
+| **CLIENT_DAYS**       |       365        | Expiration days used to generate the client certification                 |
+| **IPV4_NETWORK**      |   192.168.99.0   | Pool of tunnel IP addresses that leases will be given from                |
+| **TCP_PORT**          |       443        | TCP port number                                                           |
+| **UDP_PORT**          |       443        | UDPP port number                                                          |
+| **ISOLATE_WORKERS**   |       true       | Whether to enable seccomp/Linux namespaces worker isolation               |
+| **MAX_CLIENTS**       |       16         | Limit the number of clients. Unset or set to zero if unknown              |
+| **MAX_SAME_CLIENTS**  |       2          | Limit the number of identical clients                                     |
+| **RATE_LIMIT**        |      100         | Rate limit the number of incoming connections to one every X milliseconds |
+| **SERVER_STATS_RESET**|     604800       | Stats reset time. The period of time statistics kept                      |
+| **KEEPALIVE**         |     32400        | Keepalive in seconds                                                      |
+| **DPD**               |      90          | Dead peer detection in seconds                                            |
+| **MOBILE_DPD**        |     1800         | Dead peer detection for mobile clients                                    |
+| **SWITCH_TO_TCP**     |      25          | For DTLS, while no UDP traffic is received for 25 seconds switch to TCP   |
+| **MTU_DISCOVERY**     |     false        | MTU discovery (DPD must be enabled)                                       |
+| **COMPRESSION**       |     false        | Enables compression negotiation (LZS, LZ4)                                |
+| **TLS_PRIORITIES**    |     <string>     | GnuTLS priority string; note that SSL 3.0 is disabled by default          |
+| **AUTH_TIMEOUT**      |      240         | The time (in seconds) that a client is allowed to stay unauthenticated    |
+| **MIN_REAUTH_TIME**   |      300         | The time that a client is not allowed to reconnect after failed auth      |
+| **MAX_BAN_SCORE**     |      80          | Banning score. By default a wrong password attempt is 10 points           |
+| **BAN_RESET_TIME**    |      1200        | The time (in seconds) that all score kept for a client is reset           |
+| **COOKIE_TIMEOUT**    |      300         | Cookie timeout (in seconds), get invalid if not used within this value    |
+| **DENY_ROAMING**      |      false       | If true a cookie is restricted to a single IP address                     |
+| **REKEY_TIME**        |      172800      | Server asks the client to refresh keys once time (in seconds) is elapsed  |
+| **USE_OCCTL**         |      true        | Whether to enable support for the occtl tool                              |
+| **LOG_LEVEL**         |       2          | Log level; 0=default, 1=basic, 2=info, 3=debug, 4=http, 8=sensitive, 9=TLS|  | **DEV_NAME**          |      vpns        | The name to use for the tun device                                        |
+| **PREDICTABLE_IPS**   |      true        | If true, IP stays the same for the same user when possible                |
+| **DEFAULT_DOMAIN**    |   example.com    | The default domain to be advertised; Multiple domains to separated w space|
+| **PING_LEASES**       |      false       | Prior to leasing any IP ping it to verify that it is not in use           |
+| **CISCO_CLIENT_COMPAT**|     true        | Must by set to true to support legacy CISCO clients & openconnect < 7.08  |
+| **DTLS_LEGACY**       |      true        | This option allows one to disable the legacy DTLS negotiation             |
+| **CISCO_SVC_CLIENT_COMPAT**| false       | This option will enable the settings needed for Cisco SVC IPPhone clients |
+| **CLIENT_BYPASS_PROTO**|     false       | Enables the X-CSTP-Client-Bypass-Protocol                                 |
+| **CAMOUFLAGE**        |      false       | Enables the camouflage feature of ocserv that makes it look as web server |
+| **CAMOUFLAGE_SECRET** |   mysecretkey    | The URL prefix to pass through the camouflage                             |
+| **CAMOUFLAGE_REALM**  | Restricted Content| Defines the realm (browser prompt) for HTTP authentication               |
+| **IPV4_NETWORK**      |   192.168.99.0   | Pool of tunnel IP addresses that leases will be given from                |
+| **IPV4_NETMASK**      |   255.255.255.0  | Network mask for pool of tunnel IP addresses                              |
+| **IPV4_DNS**          |      8.8.8.8     | Advertised DNS server for pool of tunnel IP addresses                     |
 
 ### Updating image to the latest version
 
