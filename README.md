@@ -55,7 +55,7 @@ This will start an instance without any users created.
 | **IPV4_NETMASK**      |   255.255.255.0  | Network mask for pool of tunnel IP addresses                              |
 | **IPV4_DNS**          |      8.8.8.8     | Advertised DNS server for pool of tunnel IP addresses                     |
 | **TCP_PORT**          |       443        | TCP port number                                                           |
-| **UDP_PORT**          |       443        | UDPP port number                                                          |
+| **UDP_PORT**          |       443        | UDP port number                                                          |
 | **ISOLATE_WORKERS**   |       true       | Whether to enable seccomp/Linux namespaces worker isolation               |
 | **MAX_CLIENTS**       |       16         | Limit the number of clients. Unset or set to zero if unknown              |
 | **MAX_SAME_CLIENTS**  |       2          | Limit the number of identical clients                                     |
@@ -76,7 +76,8 @@ This will start an instance without any users created.
 | **DENY_ROAMING**      |      false       | If true a cookie is restricted to a single IP address                     |
 | **REKEY_TIME**        |      172800      | Server asks the client to refresh keys once time (in seconds) is elapsed  |
 | **USE_OCCTL**         |      true        | Whether to enable support for the occtl tool                              |
-| **LOG_LEVEL**         |       2          | Log level; 0=default, 1=basic, 2=info, 3=debug, 4=http, 8=sensitive, 9=TLS|  | **DEV_NAME**          |      vpns        | The name to use for the tun device                                        |
+| **LOG_LEVEL**         |       2          | Log level; 0=default, 1=basic, 2=info, 3=debug, 4=http, 8=sensitive, 9=TLS|  
+| **DEV_NAME**          |      vpns        | The name to use for the tun device                                        |
 | **PREDICTABLE_IPS**   |      true        | If true, IP stays the same for the same user when possible                |
 | **DEFAULT_DOMAIN**    |   example.com    | The default domain to be advertised; Multiple domains to separated w space|
 | **PING_LEASES**       |      false       | Prior to leasing any IP ping it to verify that it is not in use           |
