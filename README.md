@@ -52,6 +52,8 @@ This will start an instance without any users created.
 | **USER_NAME**         |       test       | Name of default user. If not set user is not created                      |
 | **CLIENT_DAYS**       |       365        | Expiration days used to generate the client certification                 |
 | **IPV4_NETWORK**      |   192.168.99.0   | Pool of tunnel IP addresses that leases will be given from                |
+| **IPV4_NETMASK**      |   255.255.255.0  | Network mask for pool of tunnel IP addresses                              |
+| **IPV4_DNS**          |      8.8.8.8     | Advertised DNS server for pool of tunnel IP addresses                     |
 | **TCP_PORT**          |       443        | TCP port number                                                           |
 | **UDP_PORT**          |       443        | UDPP port number                                                          |
 | **ISOLATE_WORKERS**   |       true       | Whether to enable seccomp/Linux namespaces worker isolation               |
@@ -85,9 +87,6 @@ This will start an instance without any users created.
 | **CAMOUFLAGE**        |      false       | Enables the camouflage feature of ocserv that makes it look as web server |
 | **CAMOUFLAGE_SECRET** |   mysecretkey    | The URL prefix to pass through the camouflage                             |
 | **CAMOUFLAGE_REALM**  | Restricted Content| Defines the realm (browser prompt) for HTTP authentication               |
-| **IPV4_NETWORK**      |   192.168.99.0   | Pool of tunnel IP addresses that leases will be given from                |
-| **IPV4_NETMASK**      |   255.255.255.0  | Network mask for pool of tunnel IP addresses                              |
-| **IPV4_DNS**          |      8.8.8.8     | Advertised DNS server for pool of tunnel IP addresses                     |
 
 ### Updating image to the latest version
 
