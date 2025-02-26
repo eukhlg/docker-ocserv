@@ -81,8 +81,7 @@ This will start an instance without any users created.
 | **PREDICTABLE_IPS**   |      true        | If true, IP stays the same for the same user when possible                |
 | **DEFAULT_DOMAIN**    |   example.com    | The default domain to be advertised; Multiple domains to separated w space|
 | **PING_LEASES**       |      false       | Prior to leasing any IP ping it to verify that it is not in use           |
-| **MTU**        |      1420      | Use this option to set a link MTU value to the incoming 
-connections  |
+| **MTU**        |      1420      | Use this option to set a link MTU value to the incoming connections  |
 | **CISCO_CLIENT_COMPAT**|     true        | Must by set to true to support legacy CISCO clients & openconnect < 7.08  |
 | **DTLS_LEGACY**       |      true        | This option allows one to disable the legacy DTLS negotiation             |
 | **CISCO_SVC_CLIENT_COMPAT**| false       | This option will enable the settings needed for Cisco SVC IPPhone clients |
