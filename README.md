@@ -40,24 +40,27 @@ This will start an instance without any users created.
 ### Environment Variables
 
 
-|   Variable            |      Default     |                          Description                                      |
-|:---------------------:|:----------------:|:-------------------------------------------------------------------------:|
-| **AUTH**              |       plain      | Client authentication method can be 'plain' or 'cert'                     |
-| **CA_CN**             |BigCorp Server CA | Common name used to generate the CA (Certificate Authority)               |
-| **CA_ORG**            |     BigCorp      | Organization name used to generate the CA                                 |
-| **CA_DAYS**           |       1825       | Expiration days used to generate the CA                                   |
-| **SRV_CN**            | www.example.com  | Common name used to generate the server certification                     |
-| **SRV_ORG**           |    MyCompany     | Organization name used to generate the server certification               |
-| **SRV_DAYS**          |       1825       | Expiration days used to generate the server certification                 |
-| **USER_NAME**         |       test       | Name of default user. If not set user is not created                      |
-| **CLIENT_DAYS**       |       365        | Expiration days used to generate the client certification                 |
-| **IPV4_NETWORK**      |   192.168.99.0   | Pool of tunnel IP addresses that leases will be given from                |
-| **IPV4_NETMASK**      |   255.255.255.0  | Network mask for pool of tunnel IP addresses                              |
-| **IPV4_DNS**          |      8.8.8.8     | Advertised DNS server for pool of tunnel IP addresses                     |
-| **TCP_PORT**          |       443        | TCP port number                                                           |
-| **UDP_PORT**          |       443        | UDP port number                                                          |
-| **ISOLATE_WORKERS**   |       true       | Whether to enable seccomp/Linux namespaces worker isolation               |
-| **MAX_CLIENTS**       |       16         | Limit the number of clients. Unset or set to zero if unknown              |
+|   Variable            |      Default                  |                          Description                                      |
+|:---------------------:|:-----------------------------:|:-------------------------------------------------------------------------:|
+| **ORG_NAME**          |   BigCorp Inc                 | Organization name, which will be used in configuration                    |
+| **HOST_NAME**         |  bigcorp.com                  | Domain/host name                                                          |
+| **AUTH**              |       plain                   | Client authentication method can be 'plain' or 'cert'                     |
+| **CA_CN**             | $ORG_NAME Root CA             | Common name used to generate the CA (Certificate Authority)               |
+| **CA_ORG**            |     $ORG_NAME                 | Organization name used to generate the CA                                 |
+| **CA_DAYS**           |       1825                    | Expiration days used to generate the CA                                   |
+| **SRV_CN**            | $ORG_NAME Server CA           | Common name used to generate the server certification                     |
+| **SRV_ORG**           |    $ORG_NAME                  | Organization name used to generate the server certification               |
+| **SRV_DAYS**          |       1825                    | Expiration days used to generate the server certification                 |
+| **USER_NAME**         |                               | Name of default user. If not set user is not created                      |
+| **USER_PASSWORD       |                               | Default user password                                                     | 
+| **CLIENT_DAYS**       |       365                     | Expiration days used to generate the client certification                 |
+| **IPV4_NETWORK**      |   192.168.99.0                | Pool of tunnel IP addresses that leases will be given from                |
+| **IPV4_NETMASK**      |   255.255.255.0               | Network mask for pool of tunnel IP addresses                              |
+| **IPV4_DNS**          |      8.8.8.8                  | Advertised DNS server for pool of tunnel IP addresses                     |
+| **ROUTE**             |   default                     | Routes to be forwarded to the client                                      |
+| **NO_ROUTE**          |   192.168.0.0/16; 10.0.0.0/8; 172.16.0.0/12 | Subsets of the routes that will not be routed by the server. Comma/Semicolon/Space separated.|
+| **ISOLATE_WORKERS**   |       true                    | Whether to enable seccomp/Linux namespaces worker isolation               |
+| **MAX_CLIENTS**       |       16                      | Limit the number of clients. Unset or set to zero if unknown              |
 | **MAX_SAME_CLIENTS**  |       2          | Limit the number of identical clients                                     |
 | **RATE_LIMIT**        |      100         | Rate limit the number of incoming connections to one every X milliseconds |
 | **SERVER_STATS_RESET**|     604800       | Stats reset time. The period of time statistics kept                      |
@@ -81,7 +84,7 @@ This will start an instance without any users created.
 | **PREDICTABLE_IPS**   |      true        | If true, IP stays the same for the same user when possible                |
 | **DEFAULT_DOMAIN**    |   example.com    | The default domain to be advertised; Multiple domains to separated w space|
 | **PING_LEASES**       |      false       | Prior to leasing any IP ping it to verify that it is not in use           |
-| **MTU**        |      1420      | Use this option to set a link MTU value to the incoming connections  |
+| **MTU**                 |      1420      | Use this option to set a link MTU value to the incoming connections  |
 | **CISCO_CLIENT_COMPAT**|     true        | Must by set to true to support legacy CISCO clients & openconnect < 7.08  |
 | **DTLS_LEGACY**       |      true        | This option allows one to disable the legacy DTLS negotiation             |
 | **CISCO_SVC_CLIENT_COMPAT**| false       | This option will enable the settings needed for Cisco SVC IPPhone clients |
