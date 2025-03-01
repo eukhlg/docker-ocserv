@@ -40,27 +40,27 @@ This will start an instance without any users created.
 ### Environment Variables
 
 
-|   Variable            |      Default                  |                          Description                                      |
-|:---------------------:|:-----------------------------:|:-------------------------------------------------------------------------:|
-| **ORG_NAME**          |   BigCorp Inc                 | Organization name, which will be used in configuration                    |
-| **HOST_NAME**         |  bigcorp.com                  | Domain/host name                                                          |
-| **AUTH**              |       plain                   | Client authentication method can be 'plain' or 'cert'                     |
-| **CA_CN**             | $ORG_NAME Root CA             | Common name used to generate the CA (Certificate Authority)               |
-| **CA_ORG**            |     $ORG_NAME                 | Organization name used to generate the CA                                 |
-| **CA_DAYS**           |       1825                    | Expiration days used to generate the CA                                   |
-| **SRV_CN**            | $ORG_NAME Server CA           | Common name used to generate the server certification                     |
-| **SRV_ORG**           |    $ORG_NAME                  | Organization name used to generate the server certification               |
-| **SRV_DAYS**          |       1825                    | Expiration days used to generate the server certification                 |
-| **USER_NAME**         |                               | Name of default user. If not set user is not created                      |
-| **USER_PASSWORD       |                               | Default user password                                                     | 
-| **CLIENT_DAYS**       |       365                     | Expiration days used to generate the client certification                 |
-| **IPV4_NETWORK**      |   192.168.99.0                | Pool of tunnel IP addresses that leases will be given from                |
-| **IPV4_NETMASK**      |   255.255.255.0               | Network mask for pool of tunnel IP addresses                              |
-| **IPV4_DNS**          |      8.8.8.8                  | Advertised DNS server for pool of tunnel IP addresses                     |
-| **ROUTE**             |   default                     | Routes to be forwarded to the client                                      |
+|   Variable            |      Default     |                          Description                                      |
+|:---------------------:|:----------------:|:-------------------------------------------------------------------------:|
+| **ORG_NAME**          |   BigCorp Inc    | Organization name, which will be used in configuration                    |
+| **HOST_NAME**         |  bigcorp.com     | Server domain/host name                                                   |
+| **AUTH**              |       plain      | Client authentication method can be 'plain' or 'cert'                     |
+| **CA_CN**             | $ORG_NAME Root CA | Common name used to generate the CA (Certificate Authority)              |
+| **CA_ORG**            |     $ORG_NAME    | Organization name used to generate the CA                                 |
+| **CA_DAYS**           |       1825       | Expiration days used to generate the CA                                   |
+| **SRV_CN**            | $ORG_NAME Server CA | Common name used to generate the server certification                  |
+| **SRV_ORG**           |    $ORG_NAME     | Organization name used to generate the server certification               |
+| **SRV_DAYS**          |       1825       | Expiration days used to generate the server certification                 |
+| **USER_NAME**         |                  | Name of default user. If not set user is not created                      |
+| **USER_PASSWORD**     |                  | Default user password                                                     | 
+| **CLIENT_DAYS**       |       365        | Expiration days used to generate the client certification                 |
+| **IPV4_NETWORK**      |   192.168.99.0   | Pool of tunnel IP addresses that leases will be given from                |
+| **IPV4_NETMASK**      |   255.255.255.0  | Network mask for pool of tunnel IP addresses                              |
+| **IPV4_DNS**          |      8.8.8.8     | Advertised DNS server for pool of tunnel IP addresses                     |
+| **ROUTE**             |   default        | Routes to be forwarded to the client                                      |
 | **NO_ROUTE**          |   192.168.0.0/16; 10.0.0.0/8; 172.16.0.0/12 | Subsets of the routes that will not be routed by the server. Comma/Semicolon/Space separated.|
-| **ISOLATE_WORKERS**   |       true                    | Whether to enable seccomp/Linux namespaces worker isolation               |
-| **MAX_CLIENTS**       |       16                      | Limit the number of clients. Unset or set to zero if unknown              |
+| **ISOLATE_WORKERS**   |       true       | Whether to enable seccomp/Linux namespaces worker isolation               |
+| **MAX_CLIENTS**       |       16         | Limit the number of clients. Unset or set to zero if unknown              |
 | **MAX_SAME_CLIENTS**  |       2          | Limit the number of identical clients                                     |
 | **RATE_LIMIT**        |      100         | Rate limit the number of incoming connections to one every X milliseconds |
 | **SERVER_STATS_RESET**|     604800       | Stats reset time. The period of time statistics kept                      |
@@ -108,7 +108,7 @@ docker compose pull && docker compose up -d
 
 ### Running examples
 
-Start an instance out of the box with username `test` and password `test`
+Start an instance out of the box with username `test` and random password.
 
 ```bash
 docker run \
@@ -122,8 +122,13 @@ docker run \
   --env USER_NAME=test \
   eukhlg/ocserv
 ```
+Password can be found in docker logs:
 
-Start an instance with server name `my.test.com`, `My Test` and `365` days
+```bash
+docker logs ocserv 2>&1 | grep -i password
+```
+
+Start an instance with organization name `My Test`, serever name `my.test.com`, CA and Server certificate valid for `365` days
 
 ```bash
 docker run \
@@ -135,27 +140,10 @@ docker run \
   --publish 443:443 \
   --publish 443:443/udp \
   --env USER_NAME=test \
-  --env SRV_CN=my.test.com \
-  --env SRV_ORG="My Test" \
+  --env ORG_NAME="My Test" \
+  --env HOST_NAME="my.test.com" \
+  --env CA_DAYS=365 \
   --env SRV_DAYS=365 \
-  eukhlg/ocserv
-```
-
-Start an instance with CA name `My CA`, `My Corp` and `3650` days
-
-```bash
-docker run \
-  --name ocserv \
-  --detach \
-  --sysctl net.ipv4.ip_forward=1 \
-  --cap-add NET_ADMIN \
-  --security-opt no-new-privileges \
-  --publish 443:443 \
-  --publish 443:443/udp \
-  --env USER_NAME=test \
-  --env CA_CN="My CA" \
-  --env CA_ORG="My Corp" \
-  --env CA_DAYS=3650 \
   eukhlg/ocserv
 ```
 
@@ -170,9 +158,10 @@ docker run \
   --security-opt no-new-privileges \
   --publish 443:443 \
   --publish 443:443/udp \
-  --env CA_CN="My CA" \
-  --env CA_ORG="My Corp" \
-  --env CA_DAYS=3650 \
+  --env ORG_NAME="My Test" \
+  --env HOST_NAME="my.test.com" \
+  --env CA_DAYS=365 \
+  --env SRV_DAYS=365 \
   eukhlg/ocserv
 ```
 
@@ -188,7 +177,7 @@ docker exec -it ocserv cut -d: -f1 /etc/ocserv/ocpasswd
 
 #### Add user
 
-If say, you want to create a user named `test`, type the following command
+To create a user named `test`, type the following command
 
 ```bash
 docker exec -ti ocserv ocpasswd -c /etc/ocserv/ocpasswd test
@@ -219,10 +208,10 @@ To create a certificate for user `test`, type the following command
 ```bash
 docker exec -it ocserv occert test
 ```
-By default user certificate is valid for `365` days and P12 certificate password is `openconnect`
+By default user certificate is valid for `365` days and P12 certificate password is empty.
 
-To create a certificate for user `test`, with certificate valid for 30 days and password `testpass` type the following command
+To create a certificate for user `test`, with password `testpass` and certificate valid for 30 days type the following command
 
 ```bash
-docker exec -it ocserv occert test 30 testpass
+docker exec -it ocserv occert test testpass 30
 ```
