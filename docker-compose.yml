@@ -2,15 +2,15 @@
 #    ocserv-data: {}
 services:
   ocserv:
-    image: eukhlg/ocserv
-    restart: unless-stopped
-    container_name: ocserv
-    hostname: www.example.com
     env_file:
       - oc.env
+    image: eukhlg/ocserv:0.4.0
+    restart: unless-stopped
+    container_name: ocserv
+    hostname: ${HOST_NAME}
     ports:
       - 443:443/udp
-      - 443:443    
+      - 443:443
     volumes:
       # - ocserv-data:/etc/ocserv
       - /opt/ocserv:/etc/ocserv

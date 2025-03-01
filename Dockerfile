@@ -22,6 +22,7 @@ FROM alpine:3.20.3
 
 # Copy compiled binary from builder stage
 COPY --from=builder /usr/local/sbin/ /usr/local/sbin/
+COPY --from=builder /usr/local/bin/ /usr/local/bin/
 COPY --from=builder /usr/src/ocserv/doc/sample.config /tmp/ocserv-default.conf
 
 # Install run dependencies
@@ -34,15 +35,15 @@ RUN apk update \
         | sed "s/ description:.*//"')" \
         | awk -F'[{}]' '{print $2}' | sort -u)" \
     && apk add --no-cache ${runDeps} \
-    gnutls-utils openssl iptables libnl3 readline libseccomp-dev lz4-dev gettext-envsubst libcap
+    gnutls-utils iptables libnl3 readline libseccomp-dev lz4-dev gettext-envsubst libcap
 
 # Create ocserv user
-#RUN addgroup -S ocserv \
-#    && adduser -S ocserv -G ocserv \
-#    && mkdir -p /var/run/ocserv /etc/ocserv /dev/net \
-#    && chown -R ocserv:ocserv /var/run/ocserv /etc/ocserv /dev/net \
-#    && setcap cap_net_admin,cap_net_raw+ep /usr/local/sbin/ocserv \
-#    && setcap cap_net_admin,cap_net_raw+ep /usr/local/sbin/ocserv-worker
+RUN addgroup -S ocserv \
+    && adduser -S ocserv -G ocserv \
+    && mkdir -p /var/run/ocserv \
+    && chown -R ocserv:ocserv /var/run/ocserv
+    #&& setcap cap_net_admin,cap_net_raw+ep /usr/local/sbin/ocserv \
+	#&& setcap cap_net_admin,cap_net_raw+ep /usr/local/sbin/ocserv-worker
 
 COPY --chmod=755 docker-entrypoint.sh /entrypoint.sh
 COPY --chmod=755 occert.sh /usr/local/bin/occert
@@ -53,4 +54,4 @@ WORKDIR /etc/ocserv
 ENTRYPOINT ["/entrypoint.sh"]
 
 EXPOSE 443
-CMD ["ocserv", "-c", "/etc/ocserv/ocserv.conf", "-f -d 2"]
+CMD ["ocserv", "-c", "/etc/ocserv/ocserv.conf", "-f", "-d 2"]
