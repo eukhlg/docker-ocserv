@@ -52,7 +52,7 @@ The following environment variables can be used to customize the ocserv instance
 | **SRV_ORG**               | `$ORG_NAME`           | Organization name for the server certificate.                               |
 | **SRV_DAYS**              | `1825`                | Expiration days for the server certificate.                                 |
 | **USER_NAME**             |                       | Default username. If not set, no user is created.                           |
-| **USER_PASSWORD**         |                       | Default user password.                                                      |
+| **USER_PASSWORD**         |                       | Default user password. If not set, random password is generated.            |
 | **CLIENT_DAYS**           | `365`                 | Expiration days for client certificates.                                    |
 | **IPV4_NETWORK**          | `192.168.99.0`        | Pool of tunnel IP addresses.                                                |
 | **IPV4_NETMASK**          | `255.255.255.0`       | Network mask for the tunnel IP pool.                                        |
