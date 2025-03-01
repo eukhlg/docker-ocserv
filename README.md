@@ -82,7 +82,7 @@ The following environment variables can be used to customize the ocserv instance
 | **LOG_LEVEL**             | `2`                   | Log level: `0`=default, `1`=basic, `2`=info, `3`=debug, `4`=http, `8`=sensitive, `9`=TLS. |
 | **DEV_NAME**              | `vpns`                | Name of the tun device.                                                     |
 | **PREDICTABLE_IPS**       | `true`                | Assign the same IP to a user when possible.                                 |
-| **DEFAULT_DOMAIN**        | `example.com`         | Default domain advertised to clients. Multiple domains can be space-separated. |
+| **DEFAULT_DOMAIN**        | `$HOST_NAME`          | Default domain advertised to clients. Multiple domains can be space-separated. |
 | **PING_LEASES**           | `false`               | Ping IPs before leasing to ensure they are unused.                          |
 | **MTU**                   | `1420`                | MTU value for incoming connections.                                         |
 | **CISCO_CLIENT_COMPAT**   | `true`                | Enable compatibility with legacy Cisco clients and OpenConnect < 7.08.      |
@@ -237,8 +237,4 @@ To create a certificate with a password (`testpass`) and validity of `30` days:
 
 ```bash
 docker exec -it ocserv occert test testpass 30
-```
-
----
-
 ```
