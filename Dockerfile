@@ -39,11 +39,13 @@ RUN apk update \
 
 # Create ocserv user
 RUN addgroup -S ocserv \
-    && adduser -S ocserv -G ocserv \
-    && mkdir -p /var/run/ocserv \
-    && chown -R ocserv:ocserv /var/run/ocserv
+    && adduser -S ocserv -G ocserv 
     #&& setcap cap_net_admin,cap_net_raw+ep /usr/local/sbin/ocserv \
 	#&& setcap cap_net_admin,cap_net_raw+ep /usr/local/sbin/ocserv-worker
+
+# Create ocserv folders
+RUN mkdir -p /etc/ocserv /var/run/ocserv \
+	&& chown -R ocserv:ocserv /var/run/ocserv 
 
 COPY --chmod=755 docker-entrypoint.sh /entrypoint.sh
 COPY --chmod=755 occert.sh /usr/local/bin/occert

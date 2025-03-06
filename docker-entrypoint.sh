@@ -20,7 +20,7 @@ set_defaults() {
   CA_CN=${CA_CN:-"${ORG_NAME} Root CA"}
   CA_ORG=${CA_ORG:-"${ORG_NAME}"}
   CA_DAYS=${CA_DAYS:-1825}
-  SRV_CN=${SRV_CN:-"${ORG_NAME} Server CA"}
+  SRV_CN=${SRV_CN:-"${HOST_NAME}"}
   SRV_ORG=${CA_ORG:-"${ORG_NAME}"}
   SRV_DAYS=${SRV_DAYS:-1825}
   USER_PASSWORD=${USER_PASSWORD:-"$(generate_password 8)"}
@@ -67,8 +67,8 @@ set_defaults() {
 }
 
 generate_certificates() {
-  mkdir -p /etc/ocserv/certs
-  cd /etc/ocserv/certs
+
+  mkdir -p ./certs && cd ./certs
 
   # Generate CA
   certtool --generate-privkey --outfile ca-key.pem
@@ -98,9 +98,9 @@ EOSRV
 }
 
 create_user_plain() {
-  if [ ! -z "$USER_NAME" ] && [ ! -f /etc/ocserv/ocpasswd ]; then
+  if [ ! -z "$USER_NAME" ] && [ ! -f ./ocpasswd ]; then
     echo "Creating plain user '${USER_NAME}' with password '${USER_PASSWORD}'..."
-    yes ${USER_PASSWORD} | ocpasswd -c /etc/ocserv/ocpasswd ${USER_NAME}
+    yes ${USER_PASSWORD} | ocpasswd -c ./ocpasswd ${USER_NAME}
   fi
 }
 
@@ -179,15 +179,15 @@ update_config() {
         -e "/^[[:space:]]*#/d; /^[[:space:]]*$/d" \
         /tmp/ocserv-default.conf
     # Append routes
-    echo "${ROUTE}" | tr ';' '\n' | tr ',' '\n' | sed 's/^[[:space:]]*//; s/[[:space:]]*$//' | sed '/^$/d' | sed 's/^/route = /'
-    echo "${NO_ROUTE}" | tr ';' '\n' | tr ',' '\n' | sed 's/^[[:space:]]*//; s/[[:space:]]*$//' | sed '/^$/d' | sed 's/^/no-route = /'
-  } > /etc/ocserv/ocserv.conf
+    echo "${ROUTE}" | tr ';, ' '\n' | sed '/^$/d' | awk '{$1=$1; print "route = " $0}'
+    echo "${NO_ROUTE}" | tr ';, ' '\n' | sed '/^$/d' | awk '{$1=$1; print "no-route = " $0}'
+  } > ./ocserv.conf
 }
 
 # Main Execution
 set_defaults
 
-if [ ! -f /etc/ocserv/certs/server-key.pem ] || [ ! -f /etc/ocserv/certs/server-cert.pem ]; then
+if [ ! -f ./certs/server-key.pem ] || [ ! -f ./certs/server-cert.pem ]; then
   generate_certificates
 fi
 

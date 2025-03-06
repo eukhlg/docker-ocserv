@@ -27,7 +27,7 @@ validate_input() {
   fi
 }
 
-# Create certificate directory
+# Create client certificate directory
 create_client_cert_dir() {
   mkdir -p "${CLIENT_CERT_DIR}" || {
     log_error "Unable to create directory ${CLIENT_CERT_DIR}"
