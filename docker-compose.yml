@@ -4,10 +4,10 @@ services:
   ocserv:
     env_file:
       - oc.env
-    image: eukhlg/ocserv:0.4.0
+    image: eukhlg/ocserv:0.4.1
     restart: unless-stopped
     container_name: ocserv
-    hostname: ${HOST_NAME}
+    hostname: ocserv
     ports:
       - 443:443/udp
       - 443:443
