@@ -155,6 +155,13 @@ setup_network() {
   chmod 600 /dev/net/tun
 }
 
+list_to_option () {
+    local LIST="$1"
+    local SEPARATORS=";, "
+
+    echo "${LIST}" | tr "${SEPARATORS}" '\n' | sed '/^$/d' | awk -v OPTION="$2" '{$1=$1; print OPTION " = " $0}'
+}
+
 update_config() {
 
   # Setup configuration
@@ -213,8 +220,9 @@ update_config() {
         -e "/^[[:space:]]*#/d; /^[[:space:]]*$/d" \
         "${DEFAULT_CONFIG_FILE}"
     # Append routes
-    echo "${ROUTE}" | tr ';, ' '\n' | sed '/^$/d' | awk '{$1=$1; print "route = " $0}'
-    echo "${NO_ROUTE}" | tr ';, ' '\n' | sed '/^$/d' | awk '{$1=$1; print "no-route = " $0}'
+    list_to_option "${ROUTE}" "route"
+    list_to_option "${NO_ROUTE}" "no-route"
+
   } > "${CONFIG_FILE}"
 }
 
