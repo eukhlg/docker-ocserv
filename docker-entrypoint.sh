@@ -66,9 +66,11 @@ set_defaults() {
   CAMOUFLAGE_REALM=${CAMOUFLAGE_REALM:-"Restricted Content"}
 }
 
+: << 'EOF'
+# Generate server certificate (GnuTLS)
 generate_certificates() {
 
-  mkdir -p ./certs && cd ./certs
+  mkdir -p "${WORKDIR}/certs" && cd "${WORKDIR}/certs"
 
   # Generate CA
   certtool --generate-privkey --outfile ca-key.pem
@@ -95,18 +97,54 @@ EOCA
   tls_www_server
 EOSRV
   certtool --generate-certificate --load-privkey server-key.pem --load-ca-certificate ca.pem --load-ca-privkey ca-key.pem --template server.tmpl --outfile server-cert.pem
+  
+  cd ..
+}
+EOF
+
+# Generate server certificate (OpenSSL)
+generate_certificates() {
+  
+  mkdir -p "${WORKDIR}/certs" && cd "${WORKDIR}/certs"
+  
+  # Generate CA private key (RSA 2048 bits)
+  openssl genpkey -algorithm RSA -out ca-key.pem -pkeyopt rsa_keygen_bits:2048
+
+  # Generate a self-signed CA certificate
+  openssl req -new -x509 -key ca-key.pem -out ca.pem \
+    -days "$CA_DAYS" \
+    -subj "/CN=$CA_CN/O=$CA_ORG"
+  
+  # Generate Server private key
+  openssl genpkey -algorithm RSA -out server-key.pem -pkeyopt rsa_keygen_bits:2048
+
+  # Generate a CSR for the server certificate
+  openssl req -new -key server-key.pem -out server.csr \
+    -days "$SRV_DAYS" \
+    -subj "/CN=$SRV_CN/O=$SRV_ORG"
+
+  # Sign the server CSR with the CA to create the server certificate
+  openssl x509 -req -in server.csr -CA ca.pem -CAkey ca-key.pem \
+    -CAcreateserial -out server-cert.pem \
+    -days "$SRV_DAYS" -sha256
+
+  # Clean up temporary files
+  rm -f server.csr ca.srl
+  rm server.csr
+  cd ..
 }
 
+
+
 create_user_plain() {
-  if [ ! -z "$USER_NAME" ] && [ ! -f ./ocpasswd ]; then
+  if [ ! -z "$USER_NAME" ] && [ ! -f "${WORKDIR}/ocpasswd" ]; then
     echo "Creating plain user '${USER_NAME}' with password '${USER_PASSWORD}'..."
-    yes ${USER_PASSWORD} | ocpasswd -c ./ocpasswd ${USER_NAME}
+    yes ${USER_PASSWORD} | ocpasswd -c "${WORKDIR}/ocpasswd" ${USER_NAME}
   fi
 }
 
 create_user_cert() {
   if [ ! -z "$USER_NAME" ]; then
-    echo "Creating user certificate '${USER_NAME}'..."
     occert ${USER_NAME} ${USER_PASSWORD}
   fi
 }
@@ -121,18 +159,16 @@ setup_network() {
 
 update_config() {
 
- # Setup configuration
+  # Setup configuration
   {
-    # Do we really need it with docker?
-    # -e "s/\(^tcp-port = \)[0-9]\+/\1${TCP_PORT}/" \
-    # -e "s/\(^udp-port = \)[0-9]\+/\1${UDP_PORT}/" \
-
     # Settings for ocserv user
     # -e "s/\(^run-as-group = \).*/\1ocserv/" \
     # -e "s/\(^socket-file = \).*/\1\/var\/run\/ocserv\/ocserv-socket/" \
 
     sed -e "s/\(^auth = \).*/\1${AUTH_STRING}/" \
         -e "s/\.\/sample\.passwd/\/etc\/ocserv\/ocpasswd/" \
+        -e "s/\(^tcp-port = \)[0-9]\+/\1${TCP_PORT}/" \
+        -e "s/\(^udp-port = \)[0-9]\+/\1${UDP_PORT}/" \
         -e "s/\(^run-as-user = \).*/\1ocserv/" \
         -e "s/\(^run-as-group = \).*/\1ocserv/" \
         -e "s/\(^socket-file = \).*/\1\/var\/run\/ocserv\/ocserv-socket/" \
@@ -181,13 +217,13 @@ update_config() {
     # Append routes
     echo "${ROUTE}" | tr ';, ' '\n' | sed '/^$/d' | awk '{$1=$1; print "route = " $0}'
     echo "${NO_ROUTE}" | tr ';, ' '\n' | sed '/^$/d' | awk '{$1=$1; print "no-route = " $0}'
-  } > ./ocserv.conf
+  } > "${CONFIG_FILE}"
 }
 
 # Main Execution
 set_defaults
 
-if [ ! -f ./certs/server-key.pem ] || [ ! -f ./certs/server-cert.pem ]; then
+if [ ! -f "${WORKDIR}/certs/server-key.pem" ] || [ ! -f "${WORKDIR}/certs/server-cert.pem" ]; then
   generate_certificates
 fi
 

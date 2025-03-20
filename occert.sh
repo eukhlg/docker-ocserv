@@ -14,12 +14,12 @@ log_error() {
 set_defaults() {
   CLIENT_DAYS=${CLIENT_DAYS:-365}
   P12_PWD=${P12_PWD:-""}
-  SERVER_CERT_DIR="/etc/ocserv/certs"
+  SERVER_CERT_DIR="${WORKDIR}/certs"
   CLIENT_CERT_DIR="${SERVER_CERT_DIR}/client"
   
 }
 
-# Validate inputxs
+# Validate input
 validate_input() {
   if [ -z "${CLIENT_CN}" ]; then
     log_error "Usage: occert <username> [p12_cert_password] [cert_valid_days] "
@@ -35,7 +35,8 @@ create_client_cert_dir() {
   }
 }
 
-# Generate client certificate
+: << 'EOF'
+# Generate client certificate (GnuTLS)
 generate_certificate() {
   KEY_FILE="${CLIENT_CERT_DIR}/${CLIENT_CN}-key.pem"
   CERT_FILE="${CLIENT_CERT_DIR}/${CLIENT_CN}.pem"
@@ -81,13 +82,11 @@ EOCL
   #  -out "${P12_FILE}" \
   #  -legacy \
   #  -passout pass:"${P12_PWD}" 
-  certtool --to-p12 \
+  yes "${P12_PWD}" | certtool --to-p12 \
     --load-privkey "${KEY_FILE}" \
     --pkcs-cipher 3des-pkcs12 \
     --load-certificate "${CERT_FILE}" \
-    --outfile user.p12 --outder \
-    --p12-compat \
-    --p12-pass "${P12_PWD}" || {
+    --outfile "${P12_FILE}" --outder || {
     log_error "Failed to generate PKCS12 file."
     exit 1
   }
@@ -96,6 +95,59 @@ EOCL
   log_info "P12 Certificate password is '${P12_PWD}'."
   log_info "Certificate is valid for ${CLIENT_DAYS} days."
 }
+EOF
+
+# Generate client certificate (OpenSSL)
+generate_certificate() {
+  KEY_FILE="${CLIENT_CERT_DIR}/${CLIENT_CN}-key.pem"
+  CERT_FILE="${CLIENT_CERT_DIR}/${CLIENT_CN}.pem"
+  P12_FILE="${CLIENT_CERT_DIR}/${CLIENT_CN}.p12"
+  CSR_FILE="${CLIENT_CERT_DIR}/${CLIENT_CN}.csr"
+
+  if [ -f "${KEY_FILE}" ] && [ -f "${CERT_FILE}" ]; then
+    log_info "Certificate for '${CLIENT_CN}' already exists."
+    exit 0
+  fi
+
+  log_info "Creating certificate for '${CLIENT_CN}'..."
+
+  # Generate client private key (RSA 2048 bits)
+  if ! openssl genpkey -algorithm RSA -out "${KEY_FILE}" -pkeyopt rsa_keygen_bits:2048; then
+    log_error "Failed to generate private key."
+    exit 1
+  fi
+
+  # Generate a certificate signing request (CSR)
+  if ! openssl req -new -key "${KEY_FILE}" -out "${CSR_FILE}" -subj "/CN=${CLIENT_CN}"; then
+    log_error "Failed to generate CSR."
+    exit 1
+  fi
+
+  # Sign the CSR with the CA certificate and key
+  if ! openssl x509 -req -in "${CSR_FILE}" \
+        -CA "${SERVER_CERT_DIR}/ca.pem" -CAkey "${SERVER_CERT_DIR}/ca-key.pem" \
+        -CAcreateserial -out "${CERT_FILE}" \
+        -days "${CLIENT_DAYS}" -sha256; then
+    log_error "Failed to generate certificate."
+    exit 1
+  fi
+
+  # Remove temporary files (CSR and CA serial)
+  #rm -f "${CSR_FILE}" "${SERVER_CERT_DIR}/ca.srl"
+  rm -f "${CSR_FILE}"
+
+  # Export to PKCS#12 format
+  if ! openssl pkcs12 -export -in "${CERT_FILE}" -inkey "${KEY_FILE}" \
+         -out "${P12_FILE}" -legacy -passout pass:"${P12_PWD}"; then
+    log_error "Failed to generate PKCS12 file."
+    exit 1
+  fi
+
+  log_info "Certificate for '${CLIENT_CN}' has been created successfully."
+  log_info "P12 Certificate password is '${P12_PWD}'."
+  log_info "Certificate is valid for ${CLIENT_DAYS} days."
+}
+
 
 # Main execution
 main() {
