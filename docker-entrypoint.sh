@@ -120,7 +120,6 @@ generate_certificates() {
 
   # Generate a CSR for the server certificate
   openssl req -new -key server-key.pem -out server.csr \
-    -days "$SRV_DAYS" \
     -subj "/CN=$SRV_CN/O=$SRV_ORG"
 
   # Sign the server CSR with the CA to create the server certificate
