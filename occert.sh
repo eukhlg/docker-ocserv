@@ -106,23 +106,33 @@ generate_certificate() {
   log_info "Creating certificate for '${CLIENT_CN}'..."
 
   # Generate client private key (RSA 2048 bits)
-  if ! openssl genpkey -algorithm RSA -out "${KEY_FILE}" -pkeyopt rsa_keygen_bits:2048; then
-    log_error "Failed to generate private key."
+  if ! openssl genpkey \
+              -algorithm RSA \
+              -out "${KEY_FILE}" \
+              -pkeyopt rsa_keygen_bits:2048; \
+              then log_error "Failed to generate private key."
     exit 1
   fi
 
   # Generate a certificate signing request (CSR)
-  if ! openssl req -new -key "${KEY_FILE}" -out "${CSR_FILE}" -subj "/CN=${CLIENT_CN}"; then
-    log_error "Failed to generate CSR."
+  if ! openssl req \
+              -new \
+              -key "${KEY_FILE}" \
+              -out "${CSR_FILE}" \
+              -subj "/CN=${CLIENT_CN}"; \
+              then log_error "Failed to generate CSR."
     exit 1
   fi
 
   # Sign the CSR with the CA certificate and key
-  if ! openssl x509 -req -in "${CSR_FILE}" \
-        -CA "${SERVER_CERT_DIR}/ca.pem" -CAkey "${SERVER_CERT_DIR}/ca-key.pem" \
-        -CAcreateserial -out "${CERT_FILE}" \
-        -days "${CLIENT_DAYS}" -sha256; then
-    log_error "Failed to generate certificate."
+  if ! openssl x509 \
+              -req \
+              -in "${CSR_FILE}" \
+              -CA "${SERVER_CERT_DIR}/ca.pem" \
+              -CAkey "${SERVER_CERT_DIR}/ca-key.pem" \
+              -CAcreateserial -out "${CERT_FILE}" \
+              -days "${CLIENT_DAYS}" -sha256; \
+              then log_error "Failed to generate certificate."
     exit 1
   fi
 
@@ -131,9 +141,14 @@ generate_certificate() {
   rm -f "${CSR_FILE}"
 
   # Export to PKCS#12 format
-  if ! openssl pkcs12 -export -in "${CERT_FILE}" -inkey "${KEY_FILE}" \
-         -out "${P12_FILE}" -legacy -passout pass:"${P12_PWD}"; then
-    log_error "Failed to generate PKCS12 file."
+  if ! openssl pkcs12 \
+              -export \
+              -in "${CERT_FILE}" \
+              -inkey "${KEY_FILE}" \
+              -out "${P12_FILE}" \
+              -legacy \
+              -passout pass:"${P12_PWD}"; \
+              then log_error "Failed to generate PKCS12 file."
     exit 1
   fi
 
