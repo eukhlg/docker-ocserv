@@ -12,7 +12,7 @@ log_error() {
 
 # Set default values
 set_defaults() {
-  
+
   CLIENT_DAYS=${CLIENT_DAYS:-365}
   P12_PWD=${P12_PWD:-""}
   
@@ -74,18 +74,13 @@ EOCL
     exit 1
   }
 
-  # Generate PKCS12 file
-  #openssl pkcs12 -export \
-  #  -in "${CERT_FILE}" \
-  #  -inkey "${KEY_FILE}" \
-  #  -out "${P12_FILE}" \
-  #  -legacy \
-  #  -passout pass:"${P12_PWD}" 
-  yes "${P12_PWD}" | certtool --to-p12 \
+  certtool --to-p12 \
     --load-privkey "${KEY_FILE}" \
+    --p12-name "${CLIENT_CN}" \
     --pkcs-cipher 3des-pkcs12 \
     --load-certificate "${CERT_FILE}" \
-    --outfile "${P12_FILE}" --outder || {
+    --outfile "${P12_FILE}" --outder
+    --password "${P12_PWD}" || {
     log_error "Failed to generate PKCS12 file."
     exit 1
   }
