@@ -3,8 +3,8 @@
 services:
   ocserv:
     env_file:
-      - oc.env
-    image: eukhlg/ocserv:0.4.1
+      - ocserv.env
+    image: eukhlg/ocserv
     restart: unless-stopped
     container_name: ocserv
     hostname: ocserv
