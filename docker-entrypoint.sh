@@ -105,7 +105,7 @@ EOF
 # Generate server certificate (OpenSSL)
 generate_certificates() {
   
-  mkdir -p "${WORKDIR}/certs" && cd "${WORKDIR}/certs"
+  mkdir -p "${SERVER_CERT_DIR}" && cd "${SERVER_CERT_DIR}"
   
   # Generate CA private key (RSA 2048 bits)
   openssl genpkey -algorithm RSA -out ca-key.pem -pkeyopt rsa_keygen_bits:2048
@@ -129,8 +129,7 @@ generate_certificates() {
     -days "$SRV_DAYS" -sha256
 
   # Clean up temporary files
-  rm -f server.csr ca.srl
-  rm server.csr
+  rm server.csr ca.srl
   cd ..
 }
 
@@ -213,7 +212,7 @@ update_config() {
         -e "s/\(.*route.*\)/#\1/" \
         -e "/\[vhost:www.example.com\]/,/cert-user-oid.*/d" \
         -e "/^[[:space:]]*#/d; /^[[:space:]]*$/d" \
-        /tmp/ocserv-default.conf
+        "${DEFAULT_CONFIG_FILE}"
     # Append routes
     echo "${ROUTE}" | tr ';, ' '\n' | sed '/^$/d' | awk '{$1=$1; print "route = " $0}'
     echo "${NO_ROUTE}" | tr ';, ' '\n' | sed '/^$/d' | awk '{$1=$1; print "no-route = " $0}'

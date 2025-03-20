@@ -38,6 +38,8 @@ FROM alpine:${BASE_VERSION}
 ENV WORKDIR="/etc/ocserv"
 ENV CONFIG_FILE="${WORKDIR}/ocserv.conf"
 ENV DEFAULT_CONFIG_FILE="/tmp/ocserv-default.conf"
+ENV SERVER_CERT_DIR="${WORKDIR}/certs"
+ENV CLIENT_CERT_DIR="${SERVER_CERT_DIR}/client"
 
 # Copy compiled binary from builder stage
 COPY --from=builder /usr/local/sbin/ /usr/local/sbin/

@@ -12,10 +12,9 @@ log_error() {
 
 # Set default values
 set_defaults() {
+  
   CLIENT_DAYS=${CLIENT_DAYS:-365}
   P12_PWD=${P12_PWD:-""}
-  SERVER_CERT_DIR="${WORKDIR}/certs"
-  CLIENT_CERT_DIR="${SERVER_CERT_DIR}/client"
   
 }
 
