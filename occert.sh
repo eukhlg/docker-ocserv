@@ -16,14 +16,13 @@ log_error() {
 set_defaults() {
 
   CLIENT_DAYS=${CLIENT_DAYS:-365}
-  CLIENT_P12_PWD=${CLIENT_P12_PWD:-""}
   
 }
 
 # Validate input
 validate_input() {
-  if [ -z "${CLIENT_CN}" ]; then
-    log_error "Usage: occert <username> [p12_cert_password] [cert_valid_days] "
+  if [ -z "${CLIENT_CN}" ] || [ -z "${CLIENT_P12_PWD}" ] ; then
+    log_error "Usage: occert <username> <p12_cert_password> [cert_valid_days] "
     exit 1
   fi
 }
