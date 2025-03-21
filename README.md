@@ -57,6 +57,8 @@ The following environment variables can be used to customize the ocserv instance
 | **IPV4_NETWORK**          | `192.168.99.0`        | Pool of tunnel IP addresses.                                                |
 | **IPV4_NETMASK**          | `255.255.255.0`       | Network mask for the tunnel IP pool.                                        |
 | **IPV4_DNS**              | `8.8.8.8`             | DNS server advertised to clients.                                           |
+| **TCP_PORT**              | `443`                 | TCP port on which the server listens.                                       |
+| **UDP_PORT**              | `443`                 | UDP port on which the server listens. Must match the Docker-published port for DTLS to function properly. |
 | **ROUTE**                 | `default`             | Routes to be forwarded to the client.                                       |
 | **NO_ROUTE**              | `192.168.0.0/16; 10.0.0.0/8; 172.16.0.0/12` | Subnets excluded from routing. Use commas, semicolons, or spaces to separate. |
 | **ISOLATE_WORKERS**       | `true`                | Enable seccomp/Linux namespaces for worker isolation.                       |
