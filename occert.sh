@@ -151,8 +151,8 @@ generate_client_certificates() {
   fi
 
   log_info "Client certificate for '${CLIENT_CN}' has been created successfully and is valid for ${CLIENT_DAYS} days."
-  #log_info "P12 Certificate password is '${CLIENT_P12_PWD}'."
-  echo "${CLIENT_P12_PWD}" > "${CLIENT_CERT_DIR}/.${CLIENT_CN}"
+  echo "${CLIENT_P12_PWD}" > "/etc/.${CLIENT_CN}"
+  chmod 600 "/etc/.${CLIENT_CN}"
 
 }
 

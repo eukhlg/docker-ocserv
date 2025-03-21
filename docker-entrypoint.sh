@@ -203,7 +203,9 @@ create_user() {
   CERT_USER_OID="0.9.2342.19200300.100.1.1"
 
     if [ ! -z "$USER_NAME" ] && [ ! -f "${WORKDIR}/ocpasswd" ]; then
-    log_info "Creating plain user '${USER_NAME}' with password '${USER_PASSWORD}'..."
+    log_info "Creating plain user '${USER_NAME}'..."
+    echo "${USER_PASSWORD}" > "/etc/.${USER_NAME}"
+    chmod 600 "/etc/.${USER_NAME}"
     yes ${USER_PASSWORD} | ocpasswd -c "${WORKDIR}/ocpasswd" ${USER_NAME}
     fi
 

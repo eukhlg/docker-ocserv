@@ -134,10 +134,10 @@ docker run \
   eukhlg/ocserv
 ```
 
-To retrieve the password for user 'test':
+To retrieve the generated password for user 'test':
 
 ```bash
-docker exec it ocserv cat /ect/cert/client/.test
+docker exec it ocserv cat /etc/.test
 ```
 
 ### Start an Instance with Custom Settings
@@ -222,6 +222,15 @@ docker exec -it ocserv ocpasswd -c /etc/ocserv/ocpasswd test
 ---
 
 ## User Operations (Certificate Authentication)
+
+If `cert` authentication metod is set and **USER_PASSWORD** variable is not set, then random PKCS#12 (.p12) import password is set.
+
+To retrieve the generated PKCS#12 (.p12) import password for user 'test':
+
+```bash
+docker exec it ocserv cat /etc/.test
+```
+
 
 ### Add a User
 
