@@ -45,10 +45,10 @@ The following environment variables can be used to customize the ocserv instance
 | **ORG_NAME**              | `BigCorp Inc`         | Organization name used in configuration.                                    |
 | **HOST_NAME**             | `vpn.bigcorp.com`     | Server domain name.                                                    |
 | **AUTH**                  | `plain`               | Client authentication method: `plain` or `cert`.                            |
-| **CA_CN**                 | `BigCorp Inc Root CA`| Common name for the Certificate Authority (CA). By default constructed as '`ORG_NAME` Root CA'. |
-| **CA_ORG**                | `BigCorp Inc`         | Organization name for the CA. By default equals to `ORG_NAME`.            |
+| **CA_CN**                 | `BigCorp Inc Root CA`| Common name for the Certificate Authority (CA). By default constructed as `ORG_NAME` Root CA. |
+| **CA_ORG**                | `BigCorp Inc`         | Organization name for the CA. By default equals `ORG_NAME`.            |
 | **CA_DAYS**               | `1825`                | Expiration days for the CA.                                                 |
-| **SRV_CN**                | `BigCorp Inc Server CA` | Common name for the server certificate. By default generated as '`ORG_NAME` Server CA'. |
+| **SRV_CN**                | `BigCorp Inc Server CA` | Common name for the server certificate. By default generated as `ORG_NAME` Server CA. |
 | **SRV_ORG**               | `BigCorp Inc`         | Organization name for the server certificate. By default equals `ORG_NAME`. |
 | **SRV_DAYS**              | `1825`                | Expiration days for the server certificate.                                 |
 | **USER_NAME**             | `-`                   | Default username. If not set, no user is created.                           |
