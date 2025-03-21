@@ -28,14 +28,6 @@ validate_input() {
   fi
 }
 
-# Create client certificate directory
-create_client_cert_dir() {
-  mkdir -p "${CLIENT_CERT_DIR}" || {
-    log_error "Unable to create directory ${CLIENT_CERT_DIR}"
-    exit 1
-  }
-}
-
 : << 'EOF'
 # Generate client certificate (GnuTLS)
 generate_client_certificates() {
@@ -95,6 +87,12 @@ EOF
 
 # Generate client certificate (OpenSSL)
 generate_client_certificates() {
+
+  mkdir -p "${CLIENT_CERT_DIR}" || {
+  log_error "Unable to create directory ${CLIENT_CERT_DIR}"
+  exit 1
+  }
+
   CLIENT_KEY_FILE="${CLIENT_CERT_DIR}/${CLIENT_CN}-key.pem"
   CLIENT_CERT_FILE="${CLIENT_CERT_DIR}/${CLIENT_CN}.pem"
   CLIENT_P12_FILE="${CLIENT_CERT_DIR}/${CLIENT_CN}.p12"
@@ -139,7 +137,6 @@ generate_client_certificates() {
   fi
 
   # Remove temporary files (CSR and CA serial)
-  #rm -f "${CLIENT_CSR_FILE}" "${SERVER_CERT_DIR}/ca.srl"
   rm -f "${CLIENT_CSR_FILE}"
 
   # Export to PKCS#12 format
@@ -169,7 +166,6 @@ main() {
 
   validate_input
   set_defaults
-  create_client_cert_dir
   generate_client_certificates
 }
 
