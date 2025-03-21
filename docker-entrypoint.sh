@@ -68,7 +68,7 @@ set_defaults() {
 
 : << 'EOF'
 # Generate server certificate (GnuTLS)
-generate_certificates() {
+generate_server_certificates() {
 
   mkdir -p "${WORKDIR}/certs" && cd "${WORKDIR}/certs"
 
@@ -103,7 +103,7 @@ EOSRV
 EOF
 
 # Generate server certificate (OpenSSL)
-generate_certificates() {
+generate_server_certificates() {
   
   mkdir -p "${SERVER_CERT_DIR}" && cd "${SERVER_CERT_DIR}"
   
@@ -230,7 +230,7 @@ update_config() {
 set_defaults
 
 if [ ! -f "${WORKDIR}/certs/server-key.pem" ] || [ ! -f "${WORKDIR}/certs/server-cert.pem" ]; then
-  generate_certificates
+  generate_server_certificates
 fi
 
 if [ "${AUTH}" = "plain" ]; then

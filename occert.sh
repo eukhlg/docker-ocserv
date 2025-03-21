@@ -36,7 +36,7 @@ create_client_cert_dir() {
 
 : << 'EOF'
 # Generate client certificate (GnuTLS)
-generate_certificate() {
+generate_client_certificates() {
   KEY_FILE="${CLIENT_CERT_DIR}/${CLIENT_CN}-key.pem"
   CERT_FILE="${CLIENT_CERT_DIR}/${CLIENT_CN}.pem"
   P12_FILE="${CLIENT_CERT_DIR}/${CLIENT_CN}.p12"
@@ -92,7 +92,7 @@ EOCL
 EOF
 
 # Generate client certificate (OpenSSL)
-generate_certificate() {
+generate_client_certificates() {
   KEY_FILE="${CLIENT_CERT_DIR}/${CLIENT_CN}-key.pem"
   CERT_FILE="${CLIENT_CERT_DIR}/${CLIENT_CN}.pem"
   P12_FILE="${CLIENT_CERT_DIR}/${CLIENT_CN}.p12"
@@ -167,7 +167,7 @@ main() {
   validate_input
   set_defaults
   create_client_cert_dir
-  generate_certificate
+  generate_client_certificates
 }
 
 # Run the script
