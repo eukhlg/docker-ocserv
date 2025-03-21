@@ -43,16 +43,16 @@ The following environment variables can be used to customize the ocserv instance
 | Variable                  | Default               | Description                                                                 |
 |---------------------------|-----------------------|-----------------------------------------------------------------------------|
 | **ORG_NAME**              | `BigCorp Inc`         | Organization name used in configuration.                                    |
-| **HOST_NAME**             | `bigcorp.com`         | Server domain/host name.                                                    |
+| **HOST_NAME**             | `vpn.bigcorp.com`     | Server domain name.                                                    |
 | **AUTH**                  | `plain`               | Client authentication method: `plain` or `cert`.                            |
-| **CA_CN**                 | `$ORG_NAME Root CA`   | Common name for the Certificate Authority (CA).                             |
-| **CA_ORG**                | `$ORG_NAME`           | Organization name for the CA.                                               |
+| **CA_CN**                 | `$BigCorp Inc Root CA`| Common name for the Certificate Authority (CA). By default generated from ORG_NAME + 'Root CA'. |
+| **CA_ORG**                | `BigCorp Inc`         | Organization name for the CA. By default equals to ORG_NAME.            |
 | **CA_DAYS**               | `1825`                | Expiration days for the CA.                                                 |
-| **SRV_CN**                | `$ORG_NAME Server CA` | Common name for the server certificate.                                     |
-| **SRV_ORG**               | `$ORG_NAME`           | Organization name for the server certificate.                               |
+| **SRV_CN**                | `BigCorp Inc Server CA` | Common name for the server certificate. By default generated from ORG_NAME + 'Server CA'. |
+| **SRV_ORG**               | `BigCorp Inc`         | Organization name for the server certificate. By default equals to ORG_NAME. |
 | **SRV_DAYS**              | `1825`                | Expiration days for the server certificate.                                 |
-| **USER_NAME**             |                       | Default username. If not set, no user is created.                           |
-| **USER_PASSWORD**         |                       | Default user password. If not set, random password is generated.            |
+| **USER_NAME**             | `-`                   | Default username. If not set, no user is created.                           |
+| **USER_PASSWORD**         | `-`                   | Default user password. If not set, random password is generated.            |
 | **CLIENT_DAYS**           | `365`                 | Expiration days for client certificates.                                    |
 | **IPV4_NETWORK**          | `192.168.99.0`        | Pool of tunnel IP addresses.                                                |
 | **IPV4_NETMASK**          | `255.255.255.0`       | Network mask for the tunnel IP pool.                                        |
@@ -82,7 +82,7 @@ The following environment variables can be used to customize the ocserv instance
 | **LOG_LEVEL**             | `2`                   | Log level: `0`=default, `1`=basic, `2`=info, `3`=debug, `4`=http, `8`=sensitive, `9`=TLS. |
 | **DEV_NAME**              | `vpns`                | Name of the tun device.                                                     |
 | **PREDICTABLE_IPS**       | `true`                | Assign the same IP to a user when possible.                                 |
-| **DEFAULT_DOMAIN**        | `$HOST_NAME`          | Default domain advertised to clients. Multiple domains can be space-separated. |
+| **DEFAULT_DOMAIN**        | `vpn.bigcorp.com`     | Default domain advertised to clients. Multiple domains can be space-separated. By default equals to HOST_NAME. |
 | **PING_LEASES**           | `false`               | Ping IPs before leasing to ensure they are unused.                          |
 | **MTU**                   | `1420`                | MTU value for incoming connections.                                         |
 | **CISCO_CLIENT_COMPAT**   | `true`                | Enable compatibility with legacy Cisco clients and OpenConnect < 7.08.      |
