@@ -195,16 +195,27 @@ generate_server_certificates() {
 
 }
 
-create_user_plain() {
-  if [ ! -z "$USER_NAME" ] && [ ! -f "${WORKDIR}/ocpasswd" ]; then
+create_user() {
+
+  if [ "${AUTH}" = "plain" ]; then
+
+  AUTH_STRING="plain\[passwd=\/etc\/ocserv\/ocpasswd\]"
+  CERT_USER_OID="0.9.2342.19200300.100.1.1"
+
+    if [ ! -z "$USER_NAME" ] && [ ! -f "${WORKDIR}/ocpasswd" ]; then
     log_info "Creating plain user '${USER_NAME}' with password '${USER_PASSWORD}'..."
     yes ${USER_PASSWORD} | ocpasswd -c "${WORKDIR}/ocpasswd" ${USER_NAME}
-  fi
-}
+    fi
 
-create_user_cert() {
-  if [ ! -z "$USER_NAME" ]; then
+  elif [ "${AUTH}" = "cert" ]; then
+
+  AUTH_STRING="certificate"
+  CERT_USER_OID="2.5.4.3"
+
+    if [ ! -z "$USER_NAME" ]; then
     occert ${USER_NAME} ${USER_PASSWORD}
+    fi
+
   fi
 }
 
@@ -291,18 +302,7 @@ update_config() {
 # Main Execution
 set_defaults
 generate_server_certificates
-
-if [ "${AUTH}" = "plain" ]; then
-  AUTH_STRING="plain\[passwd=\/etc\/ocserv\/ocpasswd\]"
-  CERT_USER_OID="0.9.2342.19200300.100.1.1"
-  create_user_plain
-
-elif [ "${AUTH}" = "cert" ]; then
-  AUTH_STRING="certificate"
-  CERT_USER_OID="2.5.4.3"
-  create_user_cert
-fi
-
+create_user
 update_config
 setup_network
 
