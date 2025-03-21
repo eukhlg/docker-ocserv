@@ -1,5 +1,7 @@
 #!/bin/sh
-set -e  # Exit on error
+
+# Exit on error
+set -e
 
 # Logging functions
 log_info() {
@@ -160,6 +162,7 @@ generate_client_certificates() {
 
 # Main execution
 main() {
+
   CLIENT_CN=$1
   CLIENT_P12_PWD=$2
   CLIENT_DAYS=$3
