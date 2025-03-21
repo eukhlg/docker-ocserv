@@ -102,14 +102,14 @@ generate_client_certificates() {
     exit 0
   fi
 
-  log_info "Creating certificate for '${CLIENT_CN}'..."
+  log_info "Creating client certificate for '${CLIENT_CN}'..."
 
   # Generate client private key (RSA 2048 bits)
   if ! openssl genpkey \
               -algorithm RSA \
               -out "${CLIENT_KEY_FILE}" \
               -pkeyopt rsa_keygen_bits:2048; \
-              then log_error "Failed to generate private key."
+              then log_error "Failed to generate client private key."
     exit 1
   fi
 
@@ -150,9 +150,10 @@ generate_client_certificates() {
     exit 1
   fi
 
-  log_info "Certificate for '${CLIENT_CN}' has been created successfully."
-  log_info "P12 Certificate password is '${CLIENT_P12_PWD}'."
-  log_info "Certificate is valid for ${CLIENT_DAYS} days."
+  log_info "Client certificate for '${CLIENT_CN}' has been created successfully and is valid for ${CLIENT_DAYS} days."
+  #log_info "P12 Certificate password is '${CLIENT_P12_PWD}'."
+  echo "${CLIENT_P12_PWD}" > "${CLIENT_CERT_DIR}/.${CLIENT_CN}"
+
 }
 
 

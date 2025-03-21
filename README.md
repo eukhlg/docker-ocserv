@@ -134,10 +134,10 @@ docker run \
   eukhlg/ocserv
 ```
 
-Retrieve the password from the logs:
+To retrieve the password for user 'test':
 
 ```bash
-docker logs ocserv 2>&1 | grep -i password
+docker exec it ocserv cat /ect/cert/client/.test
 ```
 
 ### Start an Instance with Custom Settings
@@ -198,7 +198,7 @@ docker exec -it ocserv cut -d: -f1 /etc/ocserv/ocpasswd
 To create a user named `test`:
 
 ```bash
-docker exec -ti ocserv ocpasswd -c /etc/ocserv/ocpasswd test
+docker exec -it ocserv ocpasswd -c /etc/ocserv/ocpasswd test
 ```
 
 You will be prompted to enter and confirm the password.
@@ -208,7 +208,7 @@ You will be prompted to enter and confirm the password.
 To delete a user:
 
 ```bash
-docker exec -ti ocserv ocpasswd -c /etc/ocserv/ocpasswd -d test
+docker exec -it ocserv ocpasswd -c /etc/ocserv/ocpasswd -d test
 ```
 
 ### Change a User's Password
@@ -216,7 +216,7 @@ docker exec -ti ocserv ocpasswd -c /etc/ocserv/ocpasswd -d test
 To change a user's password, use the same command as adding a user:
 
 ```bash
-docker exec -ti ocserv ocpasswd -c /etc/ocserv/ocpasswd test
+docker exec -it ocserv ocpasswd -c /etc/ocserv/ocpasswd test
 ```
 
 ---
@@ -225,15 +225,15 @@ docker exec -ti ocserv ocpasswd -c /etc/ocserv/ocpasswd test
 
 ### Add a User
 
-To create a certificate for user `test`:
+To create a certificate for user `test` with a password (`testpass`):
 
 ```bash
-docker exec -it ocserv occert test
+docker exec -it ocserv occert test testpass
 ```
 
-By default, the certificate is valid for `365` days, and the P12 certificate password is empty.
+By default, the certificate is valid for `365` days.
 
-To create a certificate with a password (`testpass`) and validity of `30` days:
+To create the same user with certificate validity of `30` days:
 
 ```bash
 docker exec -it ocserv occert test testpass 30

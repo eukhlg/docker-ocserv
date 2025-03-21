@@ -1,6 +1,15 @@
 #!/bin/sh
 set -e  # Exit on error
 
+# Logging functions
+log_info() {
+  echo "[INFO] $1"
+}
+
+log_error() {
+  echo "[ERROR] $1" >&2
+}
+
 generate_password() {
   local length=${1:-16}
   # Allowed characters that exclude ambiguous ones: l, I, 1, O, 0
@@ -105,38 +114,90 @@ EOF
 # Generate server certificate (OpenSSL)
 generate_server_certificates() {
   
-  mkdir -p "${SERVER_CERT_DIR}" && cd "${SERVER_CERT_DIR}"
-  
+  mkdir -p "${SERVER_CERT_DIR}" || {
+  log_error "Unable to create directory ${SERVER_CERT_DIR}"
+  exit 1
+  }
+
+  CA_KEY_FILE="${SERVER_CERT_DIR}/ca-key.pem"
+  CA_CERT_FILE="${SERVER_CERT_DIR}/ca.pem"
+  CA_SRL_FILE="${SERVER_CERT_DIR}/ca.srl"
+  SERVER_KEY_FILE="${SERVER_CERT_DIR}/server-key.pem"
+  SERVER_CERT_FILE="${SERVER_CERT_DIR}/server-cert.pem"
+  SERVER_CSR_FILE="${SERVER_CERT_DIR}/server.csr"
+
+
+  if [ -f "${SERVER_KEY_FILE}" ] && [ -f "${SERVER_CERT_FILE}" ]; then
+    log_info "Certificate for '${SRV_CN}' already exists."
+    exit 0
+  fi
+
+  log_info "Creating self-signed CA certificate for '${CA_CN}'..."
+
   # Generate CA private key (RSA 2048 bits)
-  openssl genpkey -algorithm RSA -out ca-key.pem -pkeyopt rsa_keygen_bits:2048
+  if ! openssl genpkey \
+              -algorithm RSA \
+              -out "${CA_KEY_FILE}" \
+              -pkeyopt rsa_keygen_bits:2048
+              then log_error "Failed to generate CA private key."
+      exit 1
+  fi
 
   # Generate a self-signed CA certificate
-  openssl req -new -x509 -key ca-key.pem -out ca.pem \
-    -days "$CA_DAYS" \
-    -subj "/CN=$CA_CN/O=$CA_ORG"
+  if ! openssl req \
+              -new \
+              -x509 \
+              -key "${CA_KEY_FILE}" \
+              -out "${CA_CERT_FILE}" \
+              -days "${CA_DAYS}" \
+              -subj "/CN=${CA_CN}/O=${CA_ORG}"
+               then log_error "Failed to CA certificate."
+    exit 1
+  fi
   
+  log_info "Creating server certificate for '${SRV_CN}'..."
+
   # Generate Server private key
-  openssl genpkey -algorithm RSA -out server-key.pem -pkeyopt rsa_keygen_bits:2048
+  if ! openssl genpkey \
+              -algorithm RSA \
+              -out "${SERVER_KEY_FILE}" \
+              -pkeyopt rsa_keygen_bits:2048
+              then log_error "Failed to generate server private key."
+    exit 1
+  fi
 
   # Generate a CSR for the server certificate
-  openssl req -new -key server-key.pem -out server.csr \
-    -subj "/CN=$SRV_CN/O=$SRV_ORG"
+  if ! openssl req \
+              -new \
+              -key "${SERVER_KEY_FILE}" \
+              -out "${SERVER_CSR_FILE}" \
+              -subj "/CN=$SRV_CN/O=$SRV_ORG"
+              then log_error "Failed to generate server CSR."
+    exit 1
+  fi
 
   # Sign the server CSR with the CA to create the server certificate
-  openssl x509 -req -in server.csr -CA ca.pem -CAkey ca-key.pem \
-    -CAcreateserial -out server-cert.pem \
-    -days "$SRV_DAYS" -sha256
+  if ! openssl x509 \
+              -req \
+              -in "${SERVER_CSR_FILE}" \
+              -CA "${CA_CERT_FILE}" \
+              -CAkey "${CA_KEY_FILE}" \
+              -CAcreateserial \
+              -out "${SERVER_CERT_FILE}" \
+              -days "${SRV_DAYS}" \
+              -sha256
+              then log_error "Failed to generate server CSR."
+    exit 1
+  fi
 
   # Clean up temporary files
-  rm server.csr ca.srl
-  cd ..
+  rm "${SERVER_CSR_FILE}" "${CA_SRL_FILE}"
+
 }
-
-
 
 create_user_plain() {
   if [ ! -z "$USER_NAME" ] && [ ! -f "${WORKDIR}/ocpasswd" ]; then
-    echo "Creating plain user '${USER_NAME}' with password '${USER_PASSWORD}'..."
+    log_info "Creating plain user '${USER_NAME}' with password '${USER_PASSWORD}'..."
     yes ${USER_PASSWORD} | ocpasswd -c "${WORKDIR}/ocpasswd" ${USER_NAME}
   fi
 }
@@ -156,10 +217,11 @@ setup_network() {
 }
 
 list_to_option () {
-    local LIST="$1"
-    local SEPARATORS=";, "
 
-    echo "${LIST}" | tr "${SEPARATORS}" '\n' | sed '/^$/d' | awk -v OPTION="$2" '{$1=$1; print OPTION " = " $0}'
+    local LIST="$1"
+    local DELIMETERS=";, "
+
+    echo "${LIST}" | tr "${DELIMETERS}" '\n' | sed '/^$/d' | awk -v OPTION="$2" '{$1=$1; print OPTION " = " $0}'
 }
 
 update_config() {
@@ -228,10 +290,7 @@ update_config() {
 
 # Main Execution
 set_defaults
-
-if [ ! -f "${WORKDIR}/certs/server-key.pem" ] || [ ! -f "${WORKDIR}/certs/server-cert.pem" ]; then
-  generate_server_certificates
-fi
+generate_server_certificates
 
 if [ "${AUTH}" = "plain" ]; then
   AUTH_STRING="plain\[passwd=\/etc\/ocserv\/ocpasswd\]"
