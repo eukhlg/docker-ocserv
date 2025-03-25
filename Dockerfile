@@ -40,6 +40,14 @@ ENV CONFIG_FILE="${WORKDIR}/ocserv.conf"
 ENV DEFAULT_CONFIG_FILE="/tmp/ocserv-default.conf"
 ENV SERVER_CERT_DIR="${WORKDIR}/certs"
 ENV CLIENT_CERT_DIR="${SERVER_CERT_DIR}/client"
+ENV CA_CERT="${SERVER_CERT_DIR}/ca.pem"
+ENV CA_PKEY="${SERVER_CERT_DIR}/ca-key.pem"
+ENV SERVER_CERT="${SERVER_CERT_DIR}/server-cert.pem"
+ENV SERVER_PKEY="${SERVER_CERT_DIR}/server-key.pem"
+ENV OC_USER="ocserv"
+ENV SOCKET_PATH="/var/run/ocserv"
+ENV SOCKET_FILE="${SOCKET_PATH}/ocserv-socket"
+ENV PID_FILE="${SOCKET_PATH}/ocserv.pid"
 
 # Copy compiled binary from builder stage
 COPY --from=builder /usr/local/sbin/ /usr/local/sbin/
@@ -67,14 +75,14 @@ RUN apk update \
 	readline
 
 # Create ocserv user
-RUN addgroup -S ocserv \
-    && adduser -S ocserv -G ocserv 
+RUN addgroup -S "${OC_USER}" \
+    && adduser -S "${OC_USER}" -G "${OC_USER}"
     #&& setcap cap_net_admin,cap_net_raw+ep /usr/local/sbin/ocserv \
 	#&& setcap cap_net_admin,cap_net_raw+ep /usr/local/sbin/ocserv-worker
 
 # Create ocserv folders
-RUN mkdir -p /etc/ocserv /var/run/ocserv \
-	&& chown -R ocserv:ocserv /var/run/ocserv
+RUN mkdir -p "${WORKDIR}" "${SOCKET_PATH}" \
+	&& chown -R "${OC_USER}":"${OC_USER}" "${SOCKET_PATH}"
 
 COPY --chmod=755 docker-entrypoint.sh /entrypoint.sh
 COPY --chmod=755 occert.sh /usr/local/bin/occert

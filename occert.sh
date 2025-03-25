@@ -12,13 +12,6 @@ log_error() {
   echo "[ERROR] $1" >&2
 }
 
-# Set default values
-set_defaults() {
-
-  CLIENT_DAYS=${CLIENT_DAYS:-365}
-  
-}
-
 # Validate input
 validate_input() {
   if [ -z "${CLIENT_CN}" ] || [ -z "${CLIENT_P12_PWD}" ] ; then
@@ -127,8 +120,8 @@ generate_client_certificates() {
   if ! openssl x509 \
               -req \
               -in "${CLIENT_CSR_FILE}" \
-              -CA "${SERVER_CERT_DIR}/ca.pem" \
-              -CAkey "${SERVER_CERT_DIR}/ca-key.pem" \
+              -CA "${CA_CERT}" \
+              -CAkey "${CA_PKEY}" \
               -CAcreateserial -out "${CLIENT_CERT_FILE}" \
               -days "${CLIENT_DAYS}" -sha256; \
               then log_error "Failed to generate certificate."
@@ -160,12 +153,11 @@ generate_client_certificates() {
 # Main execution
 main() {
 
-  CLIENT_CN=$1
-  CLIENT_P12_PWD=$2
-  CLIENT_DAYS=$3
+  local CLIENT_CN=$1
+  local CLIENT_P12_PWD=$2
+  local CLIENT_DAYS=${3:-365}
 
   validate_input
-  set_defaults
   generate_client_certificates
 }
 

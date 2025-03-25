@@ -22,59 +22,56 @@ generate_password() {
   echo
 }
 
+update_config_option() {
+
+    local OPTION="$1"
+    local VALUE="$2"
+    local LOWER_VALUE=$(echo "${VALUE}" | tr '[:upper:]' '[:lower:]')
+
+    if [ "${LOWER_VALUE}" = "true" ] || [ "${LOWER_VALUE}" = "false" ]; then
+      VALUE="${LOWER_VALUE}"
+    fi
+
+    # Process the config file
+
+        if [ -n "${VALUE}" ]; then
+            #if grep -qE "^\s*#\s*${OPTION}\s*=" "${CONFIG_FILE}"; then
+            if grep -qE "^${OPTION}\s*=" "${CONFIG_FILE}"; then
+                # Case 1: Update the existing uncommented option
+                sed -i -E "s|^(${OPTION}\s*=).*|\1 ${VALUE}|" "${CONFIG_FILE}"
+            elif 
+                grep -qE "^#${OPTION}\s*=" "${CONFIG_FILE}"; then
+                # Case 2: Uncomment and update the existing commented option
+                sed -i -E "s|^#(${OPTION}\s*=).*|\1 ${VALUE}|" "${CONFIG_FILE}"
+            else
+                # Case 3: Append the option if it doesn't exist
+                echo "${OPTION} = ${VALUE}"
+            fi
+        fi
+
+}
+
+
+
 set_defaults() {
 
-  AUTH_TIMEOUT=${AUTH_TIMEOUT:-240}
   AUTH=${AUTH:-"plain"}
-  BAN_RESET_TIME=${BAN_RESET_TIME:-1200}
   CA_CN=${CA_CN:-"${ORG_NAME} Root CA"}
   CA_DAYS=${CA_DAYS:-1825}
   CA_ORG=${CA_ORG:-"${ORG_NAME}"}
-  CAMOUFLAGE_REALM=${CAMOUFLAGE_REALM:-"Restricted Content"}
-  CAMOUFLAGE_SECRET=${CAMOUFLAGE_SECRET:-"mysecretkey"}
-  CAMOUFLAGE=${CAMOUFLAGE:-false}
-  CISCO_CLIENT_COMPAT=${CISCO_CLIENT_COMPAT:-true}
-  CISCO_SVC_CLIENT_COMPAT=${CISCO_SVC_CLIENT_COMPAT:-false}
-  CLIENT_BYPASS_PROTO=${CLIENT_BYPASS_PROTO:-false}
-  COMPRESSION=${COMPRESSION:-false}
-  COOKIE_TIMEOUT=${COOKIE_TIMEOUT:-300}
   DEFAULT_DOMAIN=${DEFAULT_DOMAIN:-"${HOST_NAME}"}
-  DENY_ROAMING=${DENY_ROAMING:-false}
-  DEV_NAME=${DEV_NAME:-vpns}
-  DPD=${DPD:-90}
-  DTLS_LEGACY=${DTLS_LEGACY:-true}
   HOST_NAME=${HOST_NAME:-"bigcorp.com"}
   IPV4_DNS=${IPV4_DNS:-"8.8.8.8"}
   IPV4_NETMASK=${IPV4_NETMASK:-"255.255.255.0"}
   IPV4_NETWORK=${IPV4_NETWORK:-"192.168.99.0"}
-  ISOLATE_WORKERS=${ISOLATE_WORKERS:-true}
-  KEEPALIVE=${KEEPALIVE:-32400}
-  LOG_LEVEL=${LOG_LEVEL:-2}
-  MAX_BAN_SCORE=${MAX_BAN_SCORE:-80}
-  MAX_CLIENTS=${MAX_CLIENTS:-16}
-  MAX_SAME_CLIENTS=${MAX_SAME_CLIENTS:-2}
-  MIN_REAUTH_TIME=${MIN_REAUTH_TIME:-300}
-  MOBILE_DPD=${MOBILE_DPD:-1800}
-  MTU_DISCOVERY=${MTU_DISCOVERY:-false}
-  MTU=${MTU:-1420}
   NO_ROUTE=${NO_ROUTE:-"192.168.0.0/16; 10.0.0.0/8; 172.16.0.0/12"}
   ORG_NAME=${ORG_NAME:-"BigCorp Inc"}
-  PING_LEASES=${PING_LEASES:-false}
-  PREDICTABLE_IPS=${PREDICTABLE_IPS:-true}
-  RATE_LIMIT=${RATE_LIMIT:-100}
-  REKEY_TIME=${REKEY_TIME:-172800}
   ROUTE=${ROUTE:-"default"}
-  SERVER_STATS_RESET=${SERVER_STATS_RESET:-604800}
   SRV_CN=${SRV_CN:-"${HOST_NAME}"}
   SRV_DAYS=${SRV_DAYS:-1825}
   SRV_ORG=${CA_ORG:-"${ORG_NAME}"}
-  SWITCH_TO_TCP=${SWITCH_TO_TCP:-25}
-  TCP_PORT=${TCP_PORT:-443}
-  TLS_PRIORITIES=${TLS_PRIORITIES:-"NORMAL:%SERVER_PRECEDENCE:%COMPAT:-VERS-SSL3.0:-VERS-TLS1.0:-VERS-TLS1.1"}
-  UDP_PORT=${UDP_PORT:-443}
-  USE_OCCTL=${USE_OCCTL:-true}
   USER_PASSWORD=${USER_PASSWORD:-"$(generate_password 8)"}
-  
+
 }
 
 : << 'EOF'
@@ -115,21 +112,16 @@ EOF
 
 # Generate server certificate (OpenSSL)
 generate_server_certificates() {
+
+  CA_SRL_FILE=$(echo "${CA_CERT}" | sed 's/\.pem$/.srl/')
+  SERVER_CSR_FILE="${SERVER_CERT_DIR}/server.csr"
   
   mkdir -p "${SERVER_CERT_DIR}" || {
   log_error "Unable to create directory ${SERVER_CERT_DIR}"
   exit 1
   }
 
-  CA_KEY_FILE="${SERVER_CERT_DIR}/ca-key.pem"
-  CA_CERT_FILE="${SERVER_CERT_DIR}/ca.pem"
-  CA_SRL_FILE="${SERVER_CERT_DIR}/ca.srl"
-  SERVER_KEY_FILE="${SERVER_CERT_DIR}/server-key.pem"
-  SERVER_CERT_FILE="${SERVER_CERT_DIR}/server-cert.pem"
-  SERVER_CSR_FILE="${SERVER_CERT_DIR}/server.csr"
-
-
-  if [ -f "${SERVER_KEY_FILE}" ] && [ -f "${SERVER_CERT_FILE}" ]; then
+  if [ -f "${SERVER_PKEY}" ] || [ -f "${SERVER_CERT}" ]; then
     log_info "Certificate for '${SRV_CN}' already exists."
     exit 0
   fi
@@ -139,7 +131,7 @@ generate_server_certificates() {
   # Generate CA private key (RSA 2048 bits)
   if ! openssl genpkey \
               -algorithm RSA \
-              -out "${CA_KEY_FILE}" \
+              -out "${CA_PKEY}" \
               -pkeyopt rsa_keygen_bits:2048
               then log_error "Failed to generate CA private key."
       exit 1
@@ -149,8 +141,8 @@ generate_server_certificates() {
   if ! openssl req \
               -new \
               -x509 \
-              -key "${CA_KEY_FILE}" \
-              -out "${CA_CERT_FILE}" \
+              -key "${CA_PKEY}" \
+              -out "${CA_CERT}" \
               -days "${CA_DAYS}" \
               -subj "/CN=${CA_CN}/O=${CA_ORG}"
                then log_error "Failed to CA certificate."
@@ -162,7 +154,7 @@ generate_server_certificates() {
   # Generate Server private key
   if ! openssl genpkey \
               -algorithm RSA \
-              -out "${SERVER_KEY_FILE}" \
+              -out "${SERVER_PKEY}" \
               -pkeyopt rsa_keygen_bits:2048
               then log_error "Failed to generate server private key."
     exit 1
@@ -171,7 +163,7 @@ generate_server_certificates() {
   # Generate a CSR for the server certificate
   if ! openssl req \
               -new \
-              -key "${SERVER_KEY_FILE}" \
+              -key "${SERVER_PKEY}" \
               -out "${SERVER_CSR_FILE}" \
               -subj "/CN=$SRV_CN/O=$SRV_ORG"
               then log_error "Failed to generate server CSR."
@@ -182,10 +174,10 @@ generate_server_certificates() {
   if ! openssl x509 \
               -req \
               -in "${SERVER_CSR_FILE}" \
-              -CA "${CA_CERT_FILE}" \
-              -CAkey "${CA_KEY_FILE}" \
+              -CA "${CA_CERT}" \
+              -CAkey "${CA_PKEY}" \
               -CAcreateserial \
-              -out "${SERVER_CERT_FILE}" \
+              -out "${SERVER_CERT}" \
               -days "${SRV_DAYS}" \
               -sha256
               then log_error "Failed to generate server CSR."
@@ -201,7 +193,8 @@ create_user() {
 
   if [ "${AUTH}" = "plain" ]; then
 
-  AUTH_STRING="plain\[passwd=\/etc\/ocserv\/ocpasswd\]"
+  #AUTH_STRING="plain\[passwd=\/etc\/ocserv\/ocpasswd\]"
+  AUTH_STRING="plain[passwd=${WORKDIR}/ocpasswd]"
   CERT_USER_OID="0.9.2342.19200300.100.1.1"
 
     if [ ! -z "$USER_NAME" ] && [ ! -f "${WORKDIR}/ocpasswd" ]; then
@@ -239,68 +232,73 @@ list_to_option () {
     echo "${LIST}" | tr "${DELIMETERS}" '\n' | sed '/^$/d' | awk -v OPTION="$2" '{$1=$1; print OPTION " = " $0}'
 }
 
+# Create configuration
 update_config() {
 
-  # Setup configuration
-  {
-    # Settings for ocserv user
-    # -e "s/\(^run-as-group = \).*/\1ocserv/" \
-    # -e "s/\(^socket-file = \).*/\1\/var\/run\/ocserv\/ocserv-socket/" \
+  # Create config file by removing unnecessary parameters from default config
+  sed -e "s/\(^[^#]*route = .*\)/#\1/" \
+      -e "/\[vhost:www.example.com\]/,/cert-user-oid.*/d" \
+      "${DEFAULT_CONFIG_FILE}" > "${CONFIG_FILE}"
 
-    sed -e "s/\(^auth = \).*/\1${AUTH_STRING}/" \
-        -e "s/\.\/sample\.passwd/\/etc\/ocserv\/ocpasswd/" \
-        -e "s/\(^tcp-port = \)[0-9]\+/\1${TCP_PORT}/" \
-        -e "s/\(^udp-port = \)[0-9]\+/\1${UDP_PORT}/" \
-        -e "s/\(^run-as-user = \).*/\1ocserv/" \
-        -e "s/\(^run-as-group = \).*/\1ocserv/" \
-        -e "s/\(^socket-file = \).*/\1\/var\/run\/ocserv\/ocserv-socket/" \
-        -e "s/\.\.\/tests/\/etc\/ocserv/" \
-        -e "s/\(^isolate-workers = \)true/\1${ISOLATE_WORKERS}/" \
-        -e "s/\(^max-clients = \)[0-9]\+/\1${MAX_CLIENTS}/" \
-        -e "s/\(^max-same-clients = \)[0-9]\+/\1${MAX_SAME_CLIENTS}/" \
-        -e "s/\(^rate-limit-ms = \)[0-9]\+/\1${RATE_LIMIT}/" \
-        -e "s/\(^server-stats-reset-time = \)[0-9]\+/\1${SERVER_STATS_RESET}/" \
-        -e "s/\(^keepalive = \)[0-9]\+/\1${KEEPALIVE}/" \
-        -e "s/\(^dpd = \)[0-9]\+/\1${DPD}/" \
-        -e "s/\(^mobile-dpd = \)[0-9]\+/\1${MOBILE_DPD}/" \
-        -e "s/\(^switch-to-tcp-timeout = \)[0-9]\+/\1${SWITCH_TO_TCP}/" \
-        -e "s/\(^try-mtu-discovery = \)false/\1${MTU_DISCOVERY}/" \
-        -e "s/\(^cert-user-oid = \).*/\1${CERT_USER_OID}/" \
-        -e "s/#\(compression.*\)/\1/; s/\(^compression = \)false/\1${COMPRESSION}/" \
-        -e "s/\(^tls-priorities = \).*/\1${TLS_PRIORITIES}/" \
-        -e "s/\(^auth-timeout = \)[0-9]\+/\1${AUTH_TIMEOUT}/" \
-        -e "s/\(^min-reauth-time = \)[0-9]\+/\1${MIN_REAUTH_TIME}/" \
-        -e "s/\(^max-ban-score = \)[0-9]\+/\1${MAX_BAN_SCORE}/" \
-        -e "s/\(^ban-reset-time = \)[0-9]\+/\1${BAN_RESET_TIME}/" \
-        -e "s/\(^cookie-timeout = \)[0-9]\+/\1${COOKIE_TIMEOUT}/" \
-        -e "s/\(^deny-roaming = \)false/\1${DENY_ROAMING}/" \
-        -e "s/\(^rekey-time = \)[0-9]\+/\1${REKEY_TIME}/" \
-        -e "s/\(^use-occtl = \)true/\1${USE_OCCTL}/" \
-        -e "s/\(^log-level = \)[0-9]\+/\1${LOG_LEVEL}/" \
-        -e "s/\(^device = \)vpns/\1${DEV_NAME}/" \
-        -e "s/\(^predictable-ips = \)true/\1${PREDICTABLE_IPS}/" \
-        -e "s/\(^default-domain = \).*/\1${DEFAULT_DOMAIN}/" \
-        -e "s/\(^ipv4-network = \)[0-9]\{1,3\}\([.][0-9]\{1,3\}\)\{3\}/\1${IPV4_NETWORK}/" \
-        -e "s/\(^ipv4-netmask = \)[0-9]\{1,3\}\([.][0-9]\{1,3\}\)\{3\}/\1${IPV4_NETMASK}/" \
-        -e "s/\(^dns = \)[0-9]\{1,3\}\([.][0-9]\{1,3\}\)\{3\}/\1${IPV4_DNS}/" \
-        -e "s/\(^ping-leases = \)false/\1${PING_LEASES}/" \
-        -e "s/#\(mtu.*\)/\1/; s/\(^mtu = \)[0-9]\{3,4\}/\1${MTU}/" \
-        -e "s/\(^cisco-client-compat = \)true/\1${CISCO_CLIENT_COMPAT}/" \
-        -e "s/\(^dtls-legacy = \)true/\1${DTLS_LEGACY}/" \
-        -e "s/\(^cisco-svc-client-compat = \)false/\1${CISCO_SVC_CLIENT_COMPAT}/" \
-        -e "s/\(^client-bypass-protocol = \)false/\1${CLIENT_BYPASS_PROTO}/" \
-        -e "s/\(^camouflage = \)false/\1${CAMOUFLAGE}/" \
-        -e "s/\(^camouflage_secret = \).*/\1${CAMOUFLAGE_SECRET}/" \
-        -e "s/\(^camouflage_realm = \).*/\1${CAMOUFLAGE_REALM}/" \
-        -e "s/\(.*route.*\)/#\1/" \
-        -e "/\[vhost:www.example.com\]/,/cert-user-oid.*/d" \
-        -e "/^[[:space:]]*#/d; /^[[:space:]]*$/d" \
-        "${DEFAULT_CONFIG_FILE}"
-    # Append routes
-    list_to_option "${ROUTE}" "route"
-    list_to_option "${NO_ROUTE}" "no-route"
+  # Set config options
+  update_config_option "auth-timeout" ${AUTH_TIMEOUT}
+  update_config_option "auth" ${AUTH_STRING}
+  update_config_option "ban-reset-time" ${BAN_RESET_TIME}
+  update_config_option "ca-cert" ${CA_CERT}
+  update_config_option "camouflage_realm" ${CAMOUFLAGE_REALM}
+  update_config_option "camouflage_secret" ${CAMOUFLAGE_SECRET}
+  update_config_option "camouflage" ${CAMOUFLAGE}
+  update_config_option "cert-user-oid" ${CERT_USER_OID}
+  update_config_option "cisco-client-compat" ${CISCO_CLIENT_COMPAT}
+  update_config_option "cisco-svc-client-compat" ${CISCO_SVC_CLIENT_COMPAT}
+  update_config_option "client-bypass-protocol" ${CLIENT_BYPASS_PROTO}
+  update_config_option "compression" ${COMPRESSION}
+  update_config_option "cookie-timeout" ${COOKIE_TIMEOUT}
+  update_config_option "default-domain" ${DEFAULT_DOMAIN}
+  update_config_option "deny-roaming" ${DENY_ROAMING}
+  update_config_option "device" ${DEV_NAME}
+  update_config_option "device" ${DEV_NAME}
+  update_config_option "dns" ${IPV4_DNS}
+  update_config_option "dpd" ${DPD}
+  update_config_option "dtls-legacy" ${DTLS_LEGACY}
+  update_config_option "ipv4-netmask" ${IPV4_NETMASK}
+  update_config_option "ipv4-network" ${IPV4_NETWORK}
+  update_config_option "isolate-workers" ${ISOLATE_WORKERS}
+  update_config_option "keepalive" ${KEEPALIVE}
+  update_config_option "log-level" ${LOG_LEVEL}
+  update_config_option "max-ban-score" ${MAX_BAN_SCORE}
+  update_config_option "max-clients" ${MAX_CLIENTS}
+  update_config_option "max-same-clients" ${MAX_SAME_CLIENTS}
+  update_config_option "min-reauth-time" ${MIN_REAUTH_TIME}
+  update_config_option "mobile-dpd" ${MOBILE_DPD}
+  update_config_option "mtu" ${MTU}
+  update_config_option "pid-file" ${PID_FILE}
+  update_config_option "ping-leases" ${PING_LEASES}
+  update_config_option "predictable-ips" ${PREDICTABLE_IPS}
+  update_config_option "rate-limit-ms" ${RATE_LIMIT}
+  update_config_option "rekey-time" ${REKEY_TIME}
+  update_config_option "run-as-user" ${OC_USER}
+  update_config_option "run-as-group" ${OC_USER}
+  update_config_option "server-cert" ${SERVER_CERT}
+  update_config_option "server-key" ${SERVER_PKEY}
+  update_config_option "server-stats-reset-time" ${SERVER_STATS_RESET}
+  update_config_option "socket-file" ${SOCKET_FILE}
+  update_config_option "switch-to-tcp-timeout" ${SWITCH_TO_TCP}
+  update_config_option "tcp-port" ${TCP_PORT}
+  update_config_option "tls-priorities" ${TLS_PRIORITIES}
+  update_config_option "try-mtu-discovery" ${MTU_DISCOVERY}
+  update_config_option "udp-port" ${UDP_PORT}
+  update_config_option "use-occtl" ${USE_OCCTL}
 
-  } > "${CONFIG_FILE}"
+  # Append routes
+  list_to_option "${ROUTE}" "route" >> "${CONFIG_FILE}"
+  list_to_option "${NO_ROUTE}" "no-route" >> "${CONFIG_FILE}"
+
+  # Sort removing commented strings & duplicates
+  sed -E "/^\s*#/d; /^\s*$/d" "${CONFIG_FILE}" \
+  | sort -u > "${CONFIG_FILE}.tmp" \
+  && mv "${CONFIG_FILE}.tmp" "${CONFIG_FILE}"
+
 }
 
 # Main Execution
