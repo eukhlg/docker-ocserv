@@ -33,7 +33,6 @@ update_config_option() {
     fi
 
     # Process the config file
-
         if [ -n "${VALUE}" ]; then
             #if grep -qE "^\s*#\s*${OPTION}\s*=" "${CONFIG_FILE}"; then
             if grep -qE "^${OPTION}\s*=" "${CONFIG_FILE}"; then
@@ -50,8 +49,6 @@ update_config_option() {
         fi
 
 }
-
-
 
 set_defaults() {
 
@@ -73,42 +70,6 @@ set_defaults() {
   USER_PASSWORD=${USER_PASSWORD:-"$(generate_password 8)"}
 
 }
-
-: << 'EOF'
-# Generate server certificate (GnuTLS)
-generate_server_certificates() {
-
-  mkdir -p "${WORKDIR}/certs" && cd "${WORKDIR}/certs"
-
-  # Generate CA
-  certtool --generate-privkey --outfile ca-key.pem
-  cat > ca.tmpl <<-EOCA
-  cn = "$CA_CN"
-  organization = "$CA_ORG"
-  serial = 1
-  expiration_days = $CA_DAYS
-  ca
-  signing_key
-  cert_signing_key
-  crl_signing_key
-EOCA
-  certtool --generate-self-signed --load-privkey ca-key.pem --template ca.tmpl --outfile ca.pem
-
-  # Generate Server Certificate
-  certtool --generate-privkey --outfile server-key.pem
-  cat > server.tmpl <<-EOSRV
-  cn = "$SRV_CN"
-  organization = "$SRV_ORG"
-  expiration_days = $SRV_DAYS
-  signing_key
-  encryption_key
-  tls_www_server
-EOSRV
-  certtool --generate-certificate --load-privkey server-key.pem --load-ca-certificate ca.pem --load-ca-privkey ca-key.pem --template server.tmpl --outfile server-cert.pem
-  
-  cd ..
-}
-EOF
 
 # Generate server certificate (OpenSSL)
 generate_server_certificates() {
@@ -193,7 +154,6 @@ create_user() {
 
   if [ "${AUTH}" = "plain" ]; then
 
-  #AUTH_STRING="plain\[passwd=\/etc\/ocserv\/ocpasswd\]"
   AUTH_STRING="plain[passwd=${WORKDIR}/ocpasswd]"
   CERT_USER_OID="0.9.2342.19200300.100.1.1"
 
@@ -217,11 +177,13 @@ create_user() {
 }
 
 setup_network() {
+
   iptables -t nat -A POSTROUTING -j MASQUERADE -s "${IPV4_NETWORK}"/"${IPV4_NETMASK}"
   iptables -A FORWARD -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu
   mkdir -p /dev/net
   mknod /dev/net/tun c 10 200
   chmod 600 /dev/net/tun
+
 }
 
 list_to_option () {
@@ -294,7 +256,7 @@ update_config() {
   list_to_option "${ROUTE}" "route" >> "${CONFIG_FILE}"
   list_to_option "${NO_ROUTE}" "no-route" >> "${CONFIG_FILE}"
 
-  # Sort removing commented strings & duplicates
+  # Sort, removing commented strings & duplicates
   sed -E "/^\s*#/d; /^\s*$/d" "${CONFIG_FILE}" \
   | sort -u > "${CONFIG_FILE}.tmp" \
   && mv "${CONFIG_FILE}.tmp" "${CONFIG_FILE}"

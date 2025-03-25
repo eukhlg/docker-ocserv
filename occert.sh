@@ -20,63 +20,6 @@ validate_input() {
   fi
 }
 
-: << 'EOF'
-# Generate client certificate (GnuTLS)
-generate_client_certificates() {
-  CLIENT_KEY_FILE="${CLIENT_CERT_DIR}/${CLIENT_CN}-key.pem"
-  CLIENT_CERT_FILE="${CLIENT_CERT_DIR}/${CLIENT_CN}.pem"
-  CLIENT_P12_FILE="${CLIENT_CERT_DIR}/${CLIENT_CN}.p12"
-
-  if [ -f "${CLIENT_KEY_FILE}" ] && [ -f "${CLIENT_CERT_FILE}" ]; then
-    log_info "Certificate for '${CLIENT_CN}' already exists."
-    exit 0
-  fi
-
-  log_info "Creating certificate for '${CLIENT_CN}'..."
-
-  # Generate private key
-  certtool --generate-privkey --outfile "${CLIENT_KEY_FILE}" || {
-    log_error "Failed to generate private key."
-    exit 1
-  }
-
-  # Create certificate template
-  cat > "${CLIENT_CERT_DIR}/${CLIENT_CN}.tmpl" <<-EOCL
-  cn = "${CLIENT_CN}"
-  expiration_days = ${CLIENT_DAYS}
-  signing_key
-  encryption_key
-  tls_www_client
-EOCL
-
-  # Generate certificate
-  certtool --generate-certificate \
-    --load-privkey "${CLIENT_KEY_FILE}" \
-    --load-ca-certificate ${SERVER_CERT_DIR}/ca.pem \
-    --load-ca-privkey ${SERVER_CERT_DIR}/ca-key.pem \
-    --template "${CLIENT_CERT_DIR}/${CLIENT_CN}.tmpl" \
-    --outfile "${CLIENT_CERT_FILE}" || {
-    log_error "Failed to generate certificate."
-    exit 1
-  }
-
-  certtool --to-p12 \
-    --load-privkey "${CLIENT_KEY_FILE}" \
-    --p12-name "${CLIENT_CN}" \
-    --pkcs-cipher 3des-pkcs12 \
-    --load-certificate "${CLIENT_CERT_FILE}" \
-    --outfile "${CLIENT_P12_FILE}" --outder
-    --password "${CLIENT_P12_PWD}" || {
-    log_error "Failed to generate PKCS12 file."
-    exit 1
-  }
-
-  log_info "Certificate for '${CLIENT_CN}' has been created successfully."
-  log_info "P12 Certificate password is '${CLIENT_P12_PWD}'."
-  log_info "Certificate is valid for ${CLIENT_DAYS} days."
-}
-EOF
-
 # Generate client certificate (OpenSSL)
 generate_client_certificates() {
 
@@ -85,10 +28,10 @@ generate_client_certificates() {
   exit 1
   }
 
-  CLIENT_KEY_FILE="${CLIENT_CERT_DIR}/${CLIENT_CN}-key.pem"
-  CLIENT_CERT_FILE="${CLIENT_CERT_DIR}/${CLIENT_CN}.pem"
-  CLIENT_P12_FILE="${CLIENT_CERT_DIR}/${CLIENT_CN}.p12"
-  CLIENT_CSR_FILE="${CLIENT_CERT_DIR}/${CLIENT_CN}.csr"
+  local CLIENT_KEY_FILE="${CLIENT_CERT_DIR}/${CLIENT_CN}-key.pem"
+  local CLIENT_CERT_FILE="${CLIENT_CERT_DIR}/${CLIENT_CN}.pem"
+  local CLIENT_P12_FILE="${CLIENT_CERT_DIR}/${CLIENT_CN}.p12"
+  local CLIENT_CSR_FILE="${CLIENT_CERT_DIR}/${CLIENT_CN}.csr"
 
   if [ -f "${CLIENT_KEY_FILE}" ] && [ -f "${CLIENT_CERT_FILE}" ]; then
     log_info "Certificate for '${CLIENT_CN}' already exists."
