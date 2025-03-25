@@ -52,17 +52,19 @@ update_config_option() {
 
 set_defaults() {
 
+    
+  HOST_NAME=${HOST_NAME:-"bigcorp.com"}
+  ORG_NAME=${ORG_NAME:-"BigCorp Inc"}
+
   AUTH=${AUTH:-"plain"}
   CA_CN=${CA_CN:-"${ORG_NAME} Root CA"}
   CA_DAYS=${CA_DAYS:-1825}
   CA_ORG=${CA_ORG:-"${ORG_NAME}"}
   DEFAULT_DOMAIN=${DEFAULT_DOMAIN:-"${HOST_NAME}"}
-  HOST_NAME=${HOST_NAME:-"bigcorp.com"}
   IPV4_DNS=${IPV4_DNS:-"8.8.8.8"}
   IPV4_NETMASK=${IPV4_NETMASK:-"255.255.255.0"}
   IPV4_NETWORK=${IPV4_NETWORK:-"192.168.99.0"}
   NO_ROUTE=${NO_ROUTE:-"192.168.0.0/16; 10.0.0.0/8; 172.16.0.0/12"}
-  ORG_NAME=${ORG_NAME:-"BigCorp Inc"}
   ROUTE=${ROUTE:-"default"}
   SRV_CN=${SRV_CN:-"${HOST_NAME}"}
   SRV_DAYS=${SRV_DAYS:-1825}
