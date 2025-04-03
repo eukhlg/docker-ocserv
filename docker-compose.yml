@@ -1,19 +1,21 @@
-#volumes:
-#    ocserv-data: {}
 services:
   ocserv:
     env_file:
-      - ocserv.env
-    image: eukhlg/ocserv
+      - ${OCSERV_ENV_FILE}
+    image: eukhlg/ocserv:${OCSERV_IMAGE_VER}
     restart: unless-stopped
-    container_name: ocserv
-    hostname: ocserv
+    container_name: ${OCSERV_CONTAINER_NAME}
+    hostname: ${OCSERV_CONTAINER_HOSTNAME}
     ports:
-      - 443:443/udp
-      - 443:443
+      - ${UDP_PORT}:${UDP_PORT}/udp
+      - ${TCP_PORT}:${TCP_PORT}
     volumes:
-      # - ocserv-data:/etc/ocserv
-      - ./ocserv:/etc/ocserv
+      - ${HOST_BIND}:${CONTAINER_BIND}
+    # Below setting passes TCP_PORT and UDP_PORT to ocserv so it will aware of actual ports
+    # mapped to container. Without this, DTLS won't work properly.
+    environment:
+      - TCP_PORT=${TCP_PORT}
+      - UDP_PORT=${UDP_PORT}
     sysctls:
       - net.ipv4.ip_forward=1
     cap_add:
