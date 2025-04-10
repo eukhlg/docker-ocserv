@@ -75,81 +75,89 @@ set_defaults() {
 
 # Generate server certificate (OpenSSL)
 generate_server_certificates() {
-
   CA_SRL_FILE=$(echo "${CA_CERT}" | sed 's/\.pem$/.srl/')
   SERVER_CSR_FILE="${SERVER_CERT_DIR}/server.csr"
   
   mkdir -p "${SERVER_CERT_DIR}" || {
-  log_error "Unable to create directory ${SERVER_CERT_DIR}"
-  exit 1
+    log_error "Unable to create directory ${SERVER_CERT_DIR}"
+    exit 1
   }
 
-  if [ -f "${SERVER_PKEY}" ] || [ -f "${SERVER_CERT}" ]; then
-    log_info "Certificate for '${SRV_CN}' already exists."
-    exit 0
-  fi
+  # Only generate CA certificate if it doesn't exist
+  if [ ! -f "${CA_PKEY}" ] || [ ! -f "${CA_CERT}" ]; then
+    log_info "Creating self-signed CA certificate for '${CA_CN}'..."
 
-  log_info "Creating self-signed CA certificate for '${CA_CN}'..."
-
-  # Generate CA private key (RSA 2048 bits)
-  if ! openssl genpkey \
-              -algorithm RSA \
-              -out "${CA_PKEY}" \
-              -pkeyopt rsa_keygen_bits:2048
-              then log_error "Failed to generate CA private key."
+    # Generate CA private key (RSA 2048 bits)
+    if ! openssl genpkey \
+                -algorithm RSA \
+                -out "${CA_PKEY}" \
+                -pkeyopt rsa_keygen_bits:2048
+    then 
+      log_error "Failed to generate CA private key."
       exit 1
-  fi
+    fi
 
-  # Generate a self-signed CA certificate
-  if ! openssl req \
-              -new \
-              -x509 \
-              -key "${CA_PKEY}" \
-              -out "${CA_CERT}" \
-              -days "${CA_DAYS}" \
-              -subj "/CN=${CA_CN}/O=${CA_ORG}"
-               then log_error "Failed to CA certificate."
-    exit 1
+    # Generate a self-signed CA certificate
+    if ! openssl req \
+                -new \
+                -x509 \
+                -key "${CA_PKEY}" \
+                -out "${CA_CERT}" \
+                -days "${CA_DAYS}" \
+                -subj "/CN=${CA_CN}/O=${CA_ORG}"
+    then 
+      log_error "Failed to generate CA certificate."
+      exit 1
+    fi
+  else
+    log_info "CA certificate for '${CA_CN}' already exists - using existing one."
   fi
   
-  log_info "Creating server certificate for '${SRV_CN}'..."
+  # Generate server certificate if it doesn't exist
+  if [ ! -f "${SERVER_PKEY}" ] || [ ! -f "${SERVER_CERT}" ]; then
+    log_info "Creating server certificate for '${SRV_CN}'..."
 
-  # Generate Server private key
-  if ! openssl genpkey \
-              -algorithm RSA \
-              -out "${SERVER_PKEY}" \
-              -pkeyopt rsa_keygen_bits:2048
-              then log_error "Failed to generate server private key."
-    exit 1
+    # Generate Server private key
+    if ! openssl genpkey \
+                -algorithm RSA \
+                -out "${SERVER_PKEY}" \
+                -pkeyopt rsa_keygen_bits:2048
+    then 
+      log_error "Failed to generate server private key."
+      exit 1
+    fi
+
+    # Generate a CSR for the server certificate
+    if ! openssl req \
+                -new \
+                -key "${SERVER_PKEY}" \
+                -out "${SERVER_CSR_FILE}" \
+                -subj "/CN=$SRV_CN/O=$SRV_ORG"
+    then 
+      log_error "Failed to generate server CSR."
+      exit 1
+    fi
+
+    # Sign the server CSR with the CA to create the server certificate
+    if ! openssl x509 \
+                -req \
+                -in "${SERVER_CSR_FILE}" \
+                -CA "${CA_CERT}" \
+                -CAkey "${CA_PKEY}" \
+                -CAcreateserial \
+                -out "${SERVER_CERT}" \
+                -days "${SRV_DAYS}" \
+                -sha256
+    then 
+      log_error "Failed to generate server certificate."
+      exit 1
+    fi
+
+    # Clean up temporary files
+    rm -f "${SERVER_CSR_FILE}" "${CA_SRL_FILE}"
+  else
+    log_info "Server certificate for '${SRV_CN}' already exists - using existing one."
   fi
-
-  # Generate a CSR for the server certificate
-  if ! openssl req \
-              -new \
-              -key "${SERVER_PKEY}" \
-              -out "${SERVER_CSR_FILE}" \
-              -subj "/CN=$SRV_CN/O=$SRV_ORG"
-              then log_error "Failed to generate server CSR."
-    exit 1
-  fi
-
-  # Sign the server CSR with the CA to create the server certificate
-  if ! openssl x509 \
-              -req \
-              -in "${SERVER_CSR_FILE}" \
-              -CA "${CA_CERT}" \
-              -CAkey "${CA_PKEY}" \
-              -CAcreateserial \
-              -out "${SERVER_CERT}" \
-              -days "${SRV_DAYS}" \
-              -sha256
-              then log_error "Failed to generate server CSR."
-    exit 1
-  fi
-
-  # Clean up temporary files
-  rm "${SERVER_CSR_FILE}" "${CA_SRL_FILE}"
-
 }
 
 create_user() {
