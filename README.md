@@ -107,68 +107,6 @@ docker stop ocserv && docker rm ocserv && docker image prune --all -f && docker 
 
 Then restart the container with your desired options (see examples below).
 
-
-## Docker Compose Setup
-
-To run `docker-ocserv` with Docker Compose, you need the following files:
-
-- `docker-compose.yml` – the main Compose file  
-- `.env` – defines environment variables for Docker Compose itself  
-- `ocserv.env` – contains environment variables specific to `ocserv`
-
-Using the default `.env` and `ocserv.env` files allows you to start the latest version of `docker-ocserv` with a simple command:
-
-```bash
-docker compose up -d
-```
-
-> [!IMPORTANT]  
-> Ensure that both `.env` and `ocserv.env` are located in the same directory as `docker-compose.yml`.
-
----
-
-### Running Multiple Instances (e.g., Dev and Prod)
-
-It’s easy to run multiple `ocserv` instances on the same host (e.g., `dev` and `prod`) by using separate `.env` and `ocserv.env` files for each environment.
-
-#### Example: Dev Environment
-
-Create the following files:
-
-<details>
-<summary><code>dev.env</code></summary>
-
-```env
-OCSERV_IMAGE_VER=dev
-OCSERV_CONTAINER_NAME=ocserv-dev
-OCSERV_CONTAINER_HOSTNAME=ocserv-dev
-UDP_PORT=9443
-TCP_PORT=9443
-HOST_BIND=./ocserv-dev
-CONTAINER_BIND=/etc/ocserv
-OCSERV_ENV_FILE=ocserv.dev.env
-```
-</details>
-
-<details>
-<summary><code>ocserv.dev.env</code></summary>
-
-```env
-ORG_NAME="BigCorp DEV Inc"
-HOST_NAME="vpndev.bigcorp.com"
-AUTH="cert"
-IPV4_NETWORK="172.20.10.0"
-USER_NAME="devtest"
-USER_PASSWORD="devtest"
-```
-</details>
-
-Then start the `dev` instance with:
-
-```bash
-docker compose --env-file dev.env up -d
-```
-
 ---
 
 ## Running Examples
@@ -239,6 +177,69 @@ docker run \
 
 ---
 
+## Docker Compose Setup
+
+To run `docker-ocserv` with Docker Compose, you need the following files:
+
+- `docker-compose.yml` – the main Compose file  
+- `.env` – defines environment variables for Docker Compose itself  
+- `ocserv.env` – contains environment variables specific to `ocserv`
+
+Using the default `.env` and `ocserv.env` files allows you to start the latest version of `docker-ocserv` with a simple command:
+
+```bash
+docker compose up -d
+```
+
+> [!IMPORTANT]  
+> Ensure that both `.env` and `ocserv.env` are located in the same directory as `docker-compose.yml`.
+
+---
+
+### Running Multiple Instances (e.g., Dev and Prod)
+
+It’s easy to run multiple `ocserv` instances on the same host (e.g., `dev` and `prod`) by using separate `.env` and `ocserv.env` files for each environment.
+
+#### Example: Dev Environment
+
+Create the following files:
+
+<details>
+<summary><code>dev.env</code></summary>
+
+```env
+OCSERV_IMAGE_VER=dev
+OCSERV_CONTAINER_NAME=ocserv-dev
+OCSERV_CONTAINER_HOSTNAME=ocserv-dev
+UDP_PORT=9443
+TCP_PORT=9443
+HOST_BIND=./ocserv-dev
+CONTAINER_BIND=/etc/ocserv
+OCSERV_ENV_FILE=ocserv.dev.env
+```
+</details>
+
+<details>
+<summary><code>ocserv.dev.env</code></summary>
+
+```env
+ORG_NAME="BigCorp DEV Inc"
+HOST_NAME="vpndev.bigcorp.com"
+AUTH="cert"
+IPV4_NETWORK="172.20.10.0"
+USER_NAME="devtest"
+USER_PASSWORD="devtest"
+```
+</details>
+
+Then start the `dev` instance with:
+
+```bash
+docker compose --env-file dev.env up -d
+```
+
+---
+
 ## User Operations (Plain Authentication)
 
 All user operations are performed while the container is running. If you used a container name other than `ocserv`, replace `ocserv` with your container name.
@@ -297,6 +298,7 @@ docker exec -it ocserv occert test testpass
 ```
 
 By default, the certificate is valid for `365` days.
+
 
 To create the same user with certificate validity of `30` days:
 
