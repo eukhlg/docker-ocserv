@@ -285,7 +285,7 @@ If `cert` authentication metod is set and **USER_PASSWORD** variable is not set,
 To retrieve the generated `PKCS#12` (.p12) import password for user 'test':
 
 ```bash
-docker exec it ocserv cat /etc/.test
+docker exec -it ocserv cat /etc/.test
 ```
 
 
